@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Интерактивная история</title>
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: #0b0d10; color: #e8eef6;
+    }
+    .wrap { max-width: 880px; margin: 0 auto; padding: 28px 18px 44px; }
+    header { display:flex; gap:14px; align-items: baseline; justify-content: space-between; flex-wrap: wrap; }
+    h1 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: .2px; color:#f3f6fb; }
+    .stats { display:flex; gap:10px; flex-wrap: wrap; }
+    .pill {
+      border: 1px solid rgba(255,255,255,.12);
+      padding: 6px 10px; border-radius: 999px;
+      background: rgba(255,255,255,.04);
+      font-size: 12px; color: rgba(232,238,246,.92);
+    }
+    main { margin-top: 18px; }
+    .card {
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      border-radius: 18px;
+      padding: 18px 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.28);
+    }
+    .title { font-size: 16px; font-weight: 800; margin: 0 0 8px; }
+    .text { margin: 0; line-height: 1.55; white-space: pre-wrap; color: rgba(232,238,246,.95); }
+    .whisper {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px dashed rgba(255,255,255,.14);
+      color: rgba(232,238,246,.62);
+      font-style: italic;
+      font-size: 13px;
+    }
+    .choices { display:grid; gap:10px; margin-top: 14px; }
+    button {
+      cursor: pointer;
+      text-align: left;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      color: rgba(232,238,246,.96);
+      padding: 12px 12px;
+      font-size: 14px;
+      transition: transform .05s ease, background .12s ease, border-color .12s ease;
+    }
+    button:hover { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.22); }
+    button:active { transform: translateY(1px); }
+    .row { display:flex; gap:10px; margin-top: 14px; flex-wrap: wrap; }
+    .ghost {
+      background: transparent;
+      border-color: rgba(255,255,255,.18);
+      color: rgba(232,238,246,.85);
+    }
+    .small { font-size: 12px; color: rgba(232,238,246,.62); margin-top: 10px; }
+    a { color: #9ad0ff; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1 id="gameTitle">Интерактивная история</h1>
+      <div class="stats" id="stats"></div>
+    </header>
+
+    <main class="card">
+      <div class="title" id="nodeTitle"></div>
+      <p class="text" id="nodeText"></p>
+      <div class="whisper" id="whisper" hidden></div>
+
+      <div class="choices" id="choices"></div>
+
+      <div class="row">
+        <button class="ghost" id="restartBtn" type="button">Начать заново</button>
+        <button class="ghost" id="backBtn" type="button" disabled>Шаг назад</button>
+      </div>
+
+      <div class="small">
+        Подсказка: редактируйте блок <code>story</code> внизу файла — там все тексты и ответы.
+      </div>
+    </main>
+  </div>
+
+<script>
+/** ======================
+ *  НАСТРОЙКИ ИГРЫ
+ *  ====================== */
+const story = {
+  meta: {
+    title: "Проект, который не отпускает",
+    // Какие параметры показывать в шапке
+    stats: [
+      { key: "day",    label: "День" },
+      { key: "budget", label: "Бюджет" },
+      { key: "stress", label: "Стресс" },
+      { key: "scope",  label: "Скоуп" },
+    ],
+    // Рандомные “шёпоты” (опционально)
+    whispers: [
+      "Это ведь просто маленькая правка, да?",
+      "Ты точно контролируешь сроки?",
+      "Скоуп растёт сам. Ты лишь наблюдаешь.",
+      "Клиент не просил этого… пока что.",
+      "Улыбнись. Сделай вид, что всё по плану.",
+      "Спринт закончится. Когда-нибудь.",
+    ],
+  },
+
+  // Начальные значения параметров
+  initialState: { day: 1, budget: 100, stress: 0, scope: 1 },
+
+  // Узлы истории
+  nodes: {
+    start: {
+      title: "Проект начинается",
+      text:
+`Ты — руководитель проекта. Бриф выглядит невинно: “лендинг и форма заявки”.
+Команда ждёт решений. Клиент уже написал “есть пара идей”.`,
+      choices: [
+        { label: "Зафиксировать требования и поставить границы", next: "boundaries", delta: { stress: +1 } },
+        { label: "Сказать “да, конечно” и двигаться быстрее", next: "yesman", delta: { scope: +1, stress: +1 } },
+        { label: "Устроить созвон, чтобы “уточнить детали”", next: "call", delta: { day: +1, stress: +1 } },
+      ]
+    },
+
+    boundaries: {
+      title: "Границы",
+      text:
+`Ты предлагаешь согласовать цели, сроки и бюджет письменно.
+Клиент отвечает: “Ок, но добавим ещё одну маленькую фичу”.`,
+      choices: [
+        { label: "Оценить фичу и предложить change request", next: "cr", delta: { day: +1 } },
+        { label: "Впитать фичу в текущий скоуп (чтобы не спорить)", next: "scope_up", delta: { scope: +1, stress: +1 } },
+      ]
+    },
+
+    yesman: {
+      title: "“Да, конечно”",
+      text:
+`Ты говоришь “сделаем”.
+Клиент присылает список на 12 пунктов и пишет: “Это всё мелочи”.`,
+      choices: [
+        { label: "Попросить приоритизацию (Must/Should/Could)", next: "prio", delta: { day: +1, stress: +1 } },
+        { label: "Согласиться и “разберёмся по ходу”", next: "scope_up", delta: { scope: +2, stress: +2, budget: -10 } },
+      ]
+    },
+
+    call: {
+      title: "Созвон",
+      text:
+`На созвоне появляются ещё два стейкхолдера.
+Один говорит: “А можно ещё личный кабинет?”.`,
+      choices: [
+        { label: "Остановить обсуждение и вернуть к целям/метрикам", next: "prio", delta: { stress: +1 } },
+        { label: "Записать всё и пообещать “черновую оценку завтра”", next: "estimation", delta: { day: +1, stress: +2 } },
+      ]
+    },
+
+    prio: {
+      title: "Приоритизация",
+      text:
+`Ты требуешь расставить приоритеты. Это разумно.
+Но клиент выбирает “всё — Must”.`,
+      choices: [
+        { label: "Предложить релиз по этапам (MVP → итерации)", next: "mvp", delta: { day: +1 } },
+        { label: "Согласиться и начать “героить” командой", next: "hero", delta: { stress: +3, budget: -15 } },
+      ]
+    },
+
+    estimation: {
+      title: "Оценка",
+      text:
+`Ты делаешь оценку. Получается “дорого”.
+Клиент пишет: “А можно вдвое дешевле?”.`,
+      choices: [
+        { label: "Урезать скоуп до MVP", next: "mvp", delta: { scope: -1, stress: +1 } },
+        { label: "Сказать “попробуем ужаться”", next: "hero", delta: { budget: -20, stress: +2 } },
+      ]
+    },
+
+    mvp: {
+      title: "MVP",
+      text:
+`Вы договариваетесь: сначала базовый релиз, потом улучшения.
+Впервые за долгое время кажется, что проект конечен.`,
+      choices: [
+        { label: "Дожать MVP и закрыть фазу", next: "win", delta: { day: +2, stress: -1 } },
+        { label: "Добавить ещё одну “маленькую” правку перед релизом", next: "scope_up", delta: { scope: +1, stress: +1 } },
+      ]
+    },
+
+    cr: {
+      title: "Change Request",
+      text:
+`Ты оформляешь изменение: влияние на срок/бюджет/риски.
+Клиент молчит… потом пишет: “Ок. Делайте”.`,
+      choices: [
+        { label: "Запустить изменение официально", next: "mvp", delta: { budget: +10, day: +1 } },
+        { label: "Спросить, какие пункты выкидываем взамен", next: "prio", delta: { stress: +1 } },
+      ]
+    },
+
+    scope_up: {
+      title: "Скоуп вырос",
+      text:
+`Проект становится шире. Документы множатся. Появляются новые “обязательные” задачи.
+Ты чувствуешь, как что-то в брифе смотрит на тебя в ответ.`,
+      choices: [
+        { label: "Собрать экстренное согласование рамок", next: "boundaries", delta: { day: +1, stress: +1 } },
+        { label: "Продолжать молча. Просто продолжать.", next: "loop", delta: { day: +1, stress: +2, scope: +1, budget: -5 } },
+      ]
+    },
+
+    hero: {
+      title: "Героизм",
+      text:
+`Команда работает дольше, чем должна. Ты закрываешь задачи собой.
+Тебя хвалят… и добавляют ещё задач.`,
+      choices: [
+        { label: "Остановиться и пересобрать план", next: "boundaries", delta: { stress: +1 } },
+        { label: "Ещё один рывок", next: "loop", delta: { day: +1, stress: +3, scope: +1, budget: -10 } },
+      ]
+    },
+
+    loop: {
+      title: "Спринт. Снова.",
+      text:
+`Появляется ещё одна правка. Ещё одно “срочно”. Ещё одна “последняя”.
+Проект катится дальше, как будто умеет двигаться сам.`,
+      choices: [
+        { label: "Попытаться завершить проект любой ценой", next: "end_check", delta: { stress: +1, day: +1 } },
+        { label: "Сделать шаг назад и вернуть контроль", next: "boundaries", delta: { stress: +1 } },
+      ]
+    },
+
+    end_check: {
+      title: "Проверка реальности",
+      text:
+`Ты пытаешься поставить точку. Но точка отодвигается.
+Вопрос: проект вообще хочет заканчиваться?`,
+      choices: [
+        { label: "Закрыть, зафиксировать, отрелизить (даже если не идеально)", next: "win", delta: { stress: -2 } },
+        { label: "Дотюнить “до идеала” (ещё чуть-чуть)", next: "bad", delta: { stress: +2, scope: +1 } },
+      ]
+    },
+
+    win: {
+      title: "Финал: релиз",
+      text:
+`Вы выпускаете MVP. Клиент доволен. Команда выдыхает.
+Проект заканчивается. На этот раз — правда.`,
+      ending: true
+    },
+
+    bad: {
+      title: "Финал: вечная доработка",
+      text:
+`“Ещё чуть-чуть” превращается в “ещё один спринт”.
+Скоуп улыбается. Проект — тоже.`,
+      ending: true
+    }
+  }
+};
+
+/** ======================
+ *  ДВИЖОК
+ *  ====================== */
+const el = {
+  title: document.getElementById("gameTitle"),
+  stats: document.getElementById("stats"),
+  nodeTitle: document.getElementById("nodeTitle"),
+  nodeText: document.getElementById("nodeText"),
+  whisper: document.getElementById("whisper"),
+  choices: document.getElementById("choices"),
+  restartBtn: document.getElementById("restartBtn"),
+  backBtn: document.getElementById("backBtn"),
+};
+
+let state = structuredClone(story.initialState);
+let currentId = "start";
+let history = []; // для шага назад
+
+function clampNumber(v) {
+  if (typeof v !== "number" || Number.isNaN(v)) return 0;
+  return v;
+}
+
+function applyDelta(delta) {
+  if (!delta) return;
+  for (const [k, dv] of Object.entries(delta)) {
+    state[k] = clampNumber((state[k] ?? 0) + clampNumber(dv));
+  }
+}
+
+function renderStats() {
+  el.stats.innerHTML = "";
+  for (const s of story.meta.stats) {
+    const val = state[s.key] ?? 0;
+    const pill = document.createElement("div");
+    pill.className = "pill";
+    pill.textContent = `${s.label}: ${val}`;
+    el.stats.appendChild(pill);
+  }
+}
+
+function maybeWhisper(isEnding) {
+  if (isEnding) { el.whisper.hidden = true; return; }
+  const list = story.meta.whispers || [];
+  if (!list.length) { el.whisper.hidden = true; return; }
+  // Показываем шёпот не всегда
+  const show = Math.random() < 0.55;
+  if (!show) { el.whisper.hidden = true; return; }
+  const line = list[Math.floor(Math.random() * list.length)];
+  el.whisper.textContent = line;
+  el.whisper.hidden = false;
+}
+
+function renderNode() {
+  const node = story.nodes[currentId];
+  if (!node) {
+    el.nodeTitle.textContent = "Ошибка";
+    el.nodeText.textContent = `Не найден узел: ${currentId}`;
+    el.choices.innerHTML = "";
+    el.whisper.hidden = true;
+    return;
+  }
+
+  el.title.textContent = story.meta.title || "Интерактивная история";
+  el.nodeTitle.textContent = node.title || "";
+  el.nodeText.textContent = node.text || "";
+
+  renderStats();
+  maybeWhisper(!!node.ending);
+
+  el.choices.innerHTML = "";
+
+  if (node.ending) {
+    const btn = document.createElement("button");
+    btn.textContent = "Сыграть ещё раз";
+    btn.addEventListener("click", restart);
+    el.choices.appendChild(btn);
+    return;
+  }
+
+  for (const ch of (node.choices || [])) {
+    const btn = document.createElement("button");
+    btn.textContent = ch.label;
+    btn.addEventListener("click", () => choose(ch));
+    el.choices.appendChild(btn);
+  }
+
+  el.backBtn.disabled = history.length === 0;
+}
+
+function choose(choice) {
+  // сохраняем снимок для шага назад
+  history.push({
+    prevId: currentId,
+    prevState: structuredClone(state),
+  });
+
+  applyDelta(choice.delta);
+  currentId = choice.next;
+  renderNode();
+}
+
+function restart() {
+  state = structuredClone(story.initialState);
+  currentId = "start";
+  history = [];
+  el.backBtn.disabled = true;
+  renderNode();
+}
+
+function back() {
+  if (!history.length) return;
+  const last = history.pop();
+  currentId = last.prevId;
+  state = last.prevState;
+  renderNode();
+}
+
+el.restartBtn.addEventListener("click", restart);
+el.backBtn.addEventListener("click", back);
+
+renderNode();
+</script>
+</body>
+</html>
