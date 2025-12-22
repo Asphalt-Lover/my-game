@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Кошмар проекта — интерактивная история</title>
+  <title>CBONDS: Орбитальный Бэклог</title>
   <style>
     :root{
       --bg0:#07070a; --bg1:#0b0d12; --ink:#e9eef7; --muted:rgba(233,238,247,.68);
@@ -16,7 +16,6 @@
       --radius: 18px;
       --shadow: 0 20px 60px rgba(0,0,0,.45);
     }
-
     *{ box-sizing:border-box; }
     html,body{ height:100%; }
     body{
@@ -29,8 +28,6 @@
       color: var(--ink);
       overflow-x:hidden;
     }
-
-    /* Animated “fog” / gradient drift */
     .bg-drift{
       position:fixed; inset:-30%;
       background:
@@ -46,8 +43,6 @@
       0%{ transform: translate3d(-2%, -1%, 0) scale(1.02) rotate(-.5deg); }
       100%{ transform: translate3d(2%, 1.5%, 0) scale(1.06) rotate(.6deg); }
     }
-
-    /* Film grain */
     .grain{
       position:fixed; inset:0;
       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
@@ -55,8 +50,6 @@
       opacity:.18;
       pointer-events:none;
     }
-
-    /* Layout */
     .wrap{ max-width: 1100px; margin: 0 auto; padding: 22px 16px 44px; position:relative; }
     header{
       display:flex; gap:14px; align-items:center; justify-content:space-between; flex-wrap:wrap;
@@ -68,10 +61,7 @@
       border-radius: var(--radius);
       box-shadow: 0 10px 40px rgba(0,0,0,.28);
     }
-    .brand{
-      display:flex; align-items:center; gap:10px;
-      min-width: 240px;
-    }
+    .brand{ display:flex; align-items:center; gap:10px; min-width: 240px; }
     .logo{
       width:34px; height:34px; border-radius: 12px;
       background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.28), rgba(255,255,255,.06)),
@@ -96,7 +86,6 @@
     }
     h1{ margin:0; font-size: 14px; letter-spacing:.2px; font-weight:800; }
     .subtitle{ font-size: 12px; color: var(--muted); margin-top:2px; }
-
     .top-right{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
     .pill{
       border: 1px solid var(--stroke);
@@ -122,8 +111,6 @@
     @media (max-width: 980px){
       .grid{ grid-template-columns: 1fr; }
     }
-
-    /* Cards */
     .card{
       border: 1px solid rgba(255,255,255,.10);
       background: rgba(255,255,255,.04);
@@ -134,7 +121,6 @@
     }
     .card-inner{ padding: 16px 16px 14px; }
 
-    /* Left main card */
     .scene-head{
       display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
       margin-bottom: 8px;
@@ -161,7 +147,6 @@
       white-space: pre-wrap;
       min-height: 120px;
     }
-
     .whisper{
       margin-top: 12px;
       padding: 12px 12px;
@@ -172,7 +157,6 @@
       font-style: italic;
       font-size: 13px;
     }
-
     .choices{ display:grid; gap:10px; margin-top: 14px; }
     button.choice{
       cursor:pointer;
@@ -193,7 +177,6 @@
       filter: brightness(1.03);
     }
     button.choice:active{ transform: translateY(1px); }
-
     .choice-meta{
       margin-top: 6px;
       font-size: 12px;
@@ -210,7 +193,6 @@
     .tag.warn{ border-color: rgba(255,205,120,.30); color: rgba(255,205,120,.92); }
     .tag.ok{ border-color: rgba(120,255,190,.30); color: rgba(140,255,210,.92); }
 
-    /* Controls row */
     .row{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 14px; }
     .ghost{
       cursor:pointer;
@@ -224,7 +206,6 @@
     .ghost:hover{ border-color: rgba(255,255,255,.30); background: rgba(255,255,255,.03); }
     .ghost:disabled{ opacity:.45; cursor:not-allowed; }
 
-    /* Right panel */
     .panel-title{
       display:flex; justify-content:space-between; align-items:center; gap:10px;
       margin:0 0 10px;
@@ -318,7 +299,6 @@
     .p.on{ background: rgba(120,255,190,.35); border-color: rgba(120,255,190,.45); }
     .p.bad{ background: rgba(255,120,120,.25); border-color: rgba(255,120,120,.45); }
 
-    /* Scene art banner (simple SVG) */
     .art{
       height: 120px;
       border-bottom: 1px solid rgba(255,255,255,.10);
@@ -337,7 +317,6 @@
     }
     @keyframes drift2{ from{ transform: translate(-1%, 1%) scale(1.02); } to{ transform: translate(2%, -1%) scale(1.06); } }
 
-    /* Glitch overlay (triggered) */
     .glitch{
       position:fixed; inset:0;
       pointer-events:none;
@@ -348,9 +327,7 @@
       mix-blend-mode: screen;
       transform: translateZ(0);
     }
-    .glitch.on{
-      animation: glitch 420ms linear 1;
-    }
+    .glitch.on{ animation: glitch 420ms linear 1; }
     @keyframes glitch{
       0%{ opacity:0; transform: translate(0,0); }
       15%{ opacity:.55; transform: translate(8px,-6px) skewX(2deg); }
@@ -359,6 +336,42 @@
       100%{ opacity:0; transform: translate(0,0); }
     }
 
+    /* Start overlay */
+    .overlay{
+      position:fixed; inset:0; z-index:10;
+      display:flex; align-items:center; justify-content:center;
+      background: rgba(0,0,0,.52);
+      backdrop-filter: blur(10px);
+      padding: 18px;
+    }
+    .overlay .modal{
+      width:min(820px, 100%);
+      border-radius: 22px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(14,14,20,.78);
+      box-shadow: 0 30px 120px rgba(0,0,0,.6);
+      overflow:hidden;
+    }
+    .overlay .modal .top{
+      padding: 16px 16px 12px;
+      border-bottom:1px solid rgba(255,255,255,.10);
+      display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+    }
+    .overlay .modal .top .t1{ font-weight: 950; letter-spacing:.2px; }
+    .overlay .modal .top .t2{ color: rgba(233,238,247,.65); font-size: 12px; margin-top:4px; }
+    .overlay .modal .body{ padding: 14px 16px 16px; }
+    .overlay .grid2{ display:grid; grid-template-columns: 1.1fr .9fr; gap:12px; }
+    @media (max-width: 860px){ .overlay .grid2{ grid-template-columns: 1fr; } }
+    .overlay .box{
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      border-radius: 18px;
+      padding: 12px 12px;
+    }
+    .overlay .box h3{ margin:0 0 8px; font-size: 13px; font-weight: 950; color: rgba(233,238,247,.88); }
+    .overlay .box p{ margin:0; font-size: 12px; line-height:1.6; color: rgba(233,238,247,.72); }
+    .overlay .actions{ display:grid; gap:10px; margin-top: 12px; }
+    .overlay .small{ margin-top:10px; font-size:12px; color: rgba(233,238,247,.62); }
     a{ color:#9ad0ff; }
     code{ color: rgba(233,238,247,.85); }
   </style>
@@ -368,17 +381,68 @@
   <div class="grain"></div>
   <div class="glitch" id="glitch"></div>
 
+  <!-- Start / Continue overlay -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <div class="top">
+        <div>
+          <div class="t1">CBONDS: Орбитальный Бэклог</div>
+          <div class="t2">Космический симулятор продуктовых решений: Совет → техком → анализ → спринт → dev → prod</div>
+        </div>
+        <div class="tiny">
+          <label style="display:inline-flex; gap:8px; align-items:center; cursor:pointer;">
+            <input type="checkbox" id="audioToggle2" checked />
+            звук
+          </label>
+          &nbsp;·&nbsp;
+          <label style="display:inline-flex; gap:8px; align-items:center; cursor:pointer;">
+            <input type="checkbox" id="typeToggle2" checked />
+            печать
+          </label>
+        </div>
+      </div>
+      <div class="body">
+        <div class="grid2">
+          <div class="box">
+            <h3>Как играть</h3>
+            <p>
+              Вы выбираете, как провести клиентский запрос через процессы Cbonds.<br>
+              Есть скрытые ответы по условиям (фокус/стресс/репутация/флаги).<br>
+              На техкоме вас ждёт мини-защита “что/зачем/почему сейчас”.
+            </p>
+            <div class="actions">
+              <button class="choice" id="btnNew">Новая миссия</button>
+              <button class="choice" id="btnContinue">Продолжить миссию</button>
+              <button class="choice" id="btnResetSave">Стереть сохранение</button>
+            </div>
+            <div class="small">Сохранение идёт автоматически после каждого выбора.</div>
+          </div>
+          <div class="box">
+            <h3>Параметры</h3>
+            <p>
+              <b>Фокус</b> — ясность и энергия. Мало фокуса → ответы закрываются, а хаос растёт.<br>
+              <b>Стресс + Скоуп</b> разгоняют Creep-meter и вероятность “немедленных задач”.<br>
+              <b>Репутация</b> помогает на Совете/техкоме.
+            </p>
+            <div class="small">Совет командования и техком — “точки решений”. Дальше работает конвейер.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="wrap">
     <header>
       <div class="brand">
         <div class="logo" aria-hidden="true"></div>
         <div>
-          <h1 id="gameTitle">Кошмар проекта</h1>
-          <div class="subtitle" id="gameSub">интерактивная история про сроки, бюджет и то, что проснулось в брифе</div>
+          <h1 id="gameTitle">CBONDS: Орбитальный Бэклог</h1>
+          <div class="subtitle" id="gameSub">космическая история про фидбэк и спринты</div>
         </div>
       </div>
 
       <div class="top-right">
+        <div class="pill" id="pillRole"><span class="dot"></span><span>Роль: <b id="stRole">—</b></span></div>
         <div class="pill" id="pillDay"><span class="dot"></span><span>День: <b id="stDay">1</b></span></div>
         <div class="pill" id="pillBudget"><span class="dot"></span><span>Бюджет: <b id="stBudget">100</b></span></div>
         <div class="pill" id="pillStress"><span class="dot"></span><span>Стресс: <b id="stStress">0</b></span></div>
@@ -388,7 +452,6 @@
     </header>
 
     <div class="grid">
-      <!-- Main -->
       <section class="card" id="mainCard">
         <div class="art">
           <div class="glow"></div>
@@ -420,7 +483,7 @@
               <h2 class="scene-title" id="nodeTitle">Загрузка…</h2>
               <div class="tiny" id="nodeMeta"></div>
             </div>
-            <div class="badge" id="nodeBadge">Глава 1</div>
+            <div class="badge" id="nodeBadge">—</div>
           </div>
 
           <p class="scene-text" id="nodeText"></p>
@@ -429,22 +492,22 @@
           <div class="choices" id="choices"></div>
 
           <div class="row">
-            <button class="ghost" id="restartBtn" type="button">Начать заново</button>
+            <button class="ghost" id="restartBtn" type="button">Новая миссия</button>
+            <button class="ghost" id="continueBtn" type="button">Продолжить</button>
             <button class="ghost" id="backBtn" type="button" disabled>Шаг назад</button>
-            <button class="ghost" id="skipBtn" type="button">Пропустить анимацию текста</button>
+            <button class="ghost" id="skipBtn" type="button">Пропустить печать</button>
           </div>
 
           <div class="tiny" style="margin-top:10px;">
-            Редактирование: все сцены лежат в объекте <code>story</code> ниже.
+            Редактирование: все сцены и ветки лежат в объекте <code>story</code>.
           </div>
         </div>
       </section>
 
-      <!-- Side -->
       <aside class="card">
         <div class="card-inner">
           <div class="panel-title">
-            <h2>Панель проекта</h2>
+            <h2>Панель станции</h2>
             <div class="tiny">
               <label style="display:inline-flex; gap:8px; align-items:center; cursor:pointer;">
                 <input type="checkbox" id="audioToggle" checked />
@@ -465,7 +528,7 @@
             </div>
             <div class="bar"><div id="creepBar"></div></div>
             <div class="tiny" id="creepHint" style="margin-top:8px;">
-              Чем выше стресс и скоуп — тем больше “оно” вмешивается.
+              Стресс + скоуп + низкий фокус повышают “шум космоса”.
             </div>
           </div>
 
@@ -482,8 +545,8 @@
 
           <div class="map">
             <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-              <div style="font-weight:900; font-size:12px;">Прогресс истории</div>
-              <div class="tiny"><span id="stepsNow">0</span>/<span id="stepsMax">14</span></div>
+              <div style="font-weight:900; font-size:12px;">Прогресс миссии</div>
+              <div class="tiny"><span id="stepsNow">0</span>/<span id="stepsMax">18</span></div>
             </div>
             <div class="dots" id="dots"></div>
           </div>
@@ -494,13 +557,9 @@
           </details>
 
           <details>
-            <summary>Справка по условиям</summary>
-            <div class="tiny" style="margin-top:10px; line-height:1.6;">
-              Некоторые ответы скрыты, пока не выполнены условия:
-              <br>• бюджет / стресс / фокус
-              <br>• флаги (например: <code>contractSigned</code>, <code>stakeholdersAligned</code>)
-              <br><br>
-              Это помогает создавать “секретные” ветки и ощущение интерактива.
+            <summary>Направление исполнения</summary>
+            <div class="tiny" id="deptHint" style="margin-top:10px; line-height:1.6;">
+              Подразделение ещё не назначено.
             </div>
           </details>
         </div>
@@ -509,703 +568,675 @@
   </div>
 
 <script>
-/** =========================================
- *  STORY: здесь вы меняете тексты и ветки
- *  ========================================= */
+/** ======================
+ *  STORY (Cbonds + космос)
+ *  Включено:
+ *  - выбор роли (Продажи / Database / PO-координатор)
+ *  - ветки по направлениям (front/back/data/design/arch)
+ *  - мини-игра “защита на техкоме” (3 вопроса)
+ *  - автосохранение/Continue (localStorage)
+ *  ====================== */
+
 const story = {
   meta: {
-    title: "Кошмар проекта",
-    subtitle: "интерактивная история про сроки, бюджет и то, что проснулось в брифе",
-    maxSteps: 14,
+    title: "CBONDS: Орбитальный Бэклог",
+    subtitle: "космическая история о фидбэке, техкомах и задачах, которые хотят быть срочными",
+    maxSteps: 18,
     whispers: [
-      "Это ведь последняя правка. Последняя.",
-      "Ты слышишь? Бриф дышит.",
-      "Сроки — это лишь предложение.",
-      "Если ты скажешь “да” ещё раз — оно улыбнётся.",
-      "Чем тише ты споришь, тем громче растёт скоуп.",
-      "Ты контролируешь проект… или проект контролирует тебя?"
+      "Клиент сказал: “быстро, вчера и бесплатно”. Значит, по протоколу — паника.",
+      "Приоритет определён. Он изменится ещё примерно 15 раз.",
+      "Совет командования уже принял решение. Теперь оно должно принять тебя.",
+      "Если задача описана “на вдохновении”, она обязательно вернётся… с комментариями.",
+      "Немедленные задачи не приходят. Они врезаются.",
+      "Dev — это тренировочный полигон. Prod — открытый космос.",
+      "В демо всё выглядит прекрасно. На проде тоже… иногда."
     ],
     randomEvents: [
-      { id:"late_message", chance: 0.18, text:"Ночью приходит сообщение: “Я тут подумал…”.", delta:{ stress:+2, focus:-6 }, glitch:true },
-      { id:"supportive_team", chance: 0.12, text:"Команда сама предлагает план стабилизации.", delta:{ stress:-2, focus:+4 } },
-      { id:"client_praise", chance: 0.10, text:"Клиент хвалит. На секунду становится легче.", delta:{ stress:-1 } },
-      { id:"scope_seed", chance: 0.14, text:"В документе внезапно появляется новый раздел “Обязательно”.", delta:{ scope:+1, stress:+1 }, glitch:true },
+      { id:"client_urgent_ping", chance: 0.14, text:"Сигнал из сектора: «Клиент на линии. Нужно вчера и бесплатно».", delta:{ stress:+2, focus:-6 } },
+      { id:"priority_shuffle", chance: 0.12, text:"В журнале навигации кто-то перетасовал приоритеты. Снова.", delta:{ stress:+1, scope:+1 } },
+      { id:"immediate_incident", chance: 0.09, text:"Немедленная задача: микрометеорит пробил модуль. План спринта трещит.", delta:{ stress:+3, scope:+1, focus:-8 } },
+      { id:"team_alignment", chance: 0.11, text:"Техлиды синхронизировались и предложили реалистичный план полёта.", delta:{ stress:-2, focus:+6, rep:+1 } },
     ],
   },
 
   initialState: {
-    day: 1,
-    budget: 100,
-    stress: 0,
-    scope: 1,
-    focus: 100,  // энергия/ясность
-    rep: 0,      // -10..+10 условно
-    steps: 0,
+    day: 1, budget: 100, stress: 0, scope: 1, focus: 100, rep: 0, steps: 0,
+    role: "—", // "Продажи" | "Database" | "PO"
+    quiz: { active:false, q:0, score:0, total:0, onFailNext:"", onPassNext:"" },
     flags: {
-      contractSigned: false,
-      stakeholdersAligned: false,
-      changeProcess: false,
-      mvpAgreed: false,
-      devOnYourSide: false,
-      creepAwake: false,
-      legalInvolved: false,
-      qaInvolved: false,
-      pitchWon: false,
+      onFeedbackCouncil:false, councilDecided:false, decision:"",
+      backlogFormed:false,
+      routedToDev:false, routedToDevDept:"",
+      routedToDevelopment:false, developmentAccepted:false,
+      onTechcom:false, techcomAccepted:false,
+      techAnalysisDone:false, returnedForClarification:false,
+      estimateSmall:false, estimateLarge:false,
+      inSprint:false, sprintCut:false, sprintTweaked:false,
+      demoDone:false, retroDone:false,
+      immediateTaskHit:false,
+      onDev:false, bugsFound:false, onProd:false, done:false,
+      salesNotified:false,
+      creepAwake:false
     }
   },
 
   nodes: {
+    prologue: {
+      chapter: 0,
+      title: "Выбор роли",
+      text:
+`Добро пожаловать на орбитальную станцию CBONDS-1.
+
+Откуда вы принимаете клиентский сигнал?
+(Роль влияет на репутацию/стресс и на некоторые ответы.)`,
+      choices: [
+        { label:"Я из Продаж: клиент на линии, надо вчера", next:"start", delta:{ rep:+1, stress:+1 }, setRole:"Продажи" },
+        { label:"Я из Database: запросы точные, но срочные", next:"start", delta:{ rep:+1, focus:-2 }, setRole:"Database" },
+        { label:"Я PO: координирую фидбэк и держу процесс", next:"start", delta:{ rep:+2, stress:+1, focus:-2 }, setRole:"PO" },
+      ]
+    },
+
     start: {
       chapter: 1,
-      title: "Проект начинается",
+      title: "Сигнал с орбиты",
       text:
-`Ты — PM. Клиент “важный”, сроки “вчера”, бюджет “скромный”.
-Бриф выглядит невинно: “лендинг + форма”.
+`Вы — координатор миссии по клиентскому запросу.
+Сигнал почти всегда одинаковый: “быстро, вчера и бесплатно”.
 
-Проблема в том, что внутри брифа есть место, куда никто не смотрит слишком долго.`,
+Вопрос: как провести запрос через весь космический конвейер Cbonds — и вернуть результат клиенту?`,
       choices: [
-        {
-          label: "Зафиксировать рамки: цели → срок → бюджет → критерии готовности",
-          next: "frame",
-          delta: { stress:+1, focus:-2, rep:+1 }
-        },
-        {
-          label: "Сказать “да, конечно” и стартануть быстрее всех",
-          next: "yes_start",
-          delta: { scope:+1, stress:+1, focus:-4 }
-        },
-        {
-          label: "Собрать команду и провести kick-off с рисками",
-          next: "kickoff",
-          delta: { day:+1, focus:-3, rep:+1 }
-        },
-        {
-          label: "Сразу отправить договор и условия change request",
-          next: "contract",
-          delta: { day:+1, stress:+1, rep:+1 }
-        },
+        { label:"Принять фидбэк и уточнить проблему + критерии готовности", next:"intake", delta:{ focus:-3, rep:+1 } },
+        { label:"Сразу обещать сроки клиенту (опасно)", next:"promise", delta:{ stress:+2, rep:-1, scope:+1 }, setFlags:{ creepAwake:true } },
+        { label:"Собрать примеры/скриншоты/шаги воспроизведения (чтобы не вернулось)", next:"evidence", delta:{ day:+1, focus:-4, rep:+1 } },
+        { label:"Сделать “космический one-pager”: что/зачем/эффект/риски", next:"onepager", delta:{ day:+1, focus:-4, rep:+2 } },
       ]
     },
 
-    frame: {
+    onepager: {
       chapter: 1,
-      title: "Рамки и границы",
+      title: "One-pager",
       text:
-`Ты предлагаешь короткий документ: “что делаем / что не делаем / как меняем”.
-Клиент отвечает: “Ок… но добавим ещё одну маленькую фичу”.
+`Вы упаковали запрос в одну страницу:
+— что нужно
+— зачем
+— эффект
+— риски/альтернативы
+— критерии “сделано”
 
-Слова “маленькая фича” звучат как заклинание.`,
+Теперь вы готовы к Совету командования.`,
       choices: [
-        { label: "Попросить приоритизацию (Must/Should/Could)", next:"prio", delta:{ day:+1, stress:+1, focus:-3 } },
-        { label: "Согласиться, но записать в backlog", next:"backlog", delta:{ scope:+1, stress:+1, focus:-3 } },
-        { label: "Сразу оформить change request (оценка + влияние)", next:"change_req", delta:{ day:+1, rep:+1 }, setFlags:{ changeProcess:true } },
+        { label:"На Совет командования (совещание по фидбэку)", next:"feedback_council", delta:{ day:+1, focus:-3, rep:+2 }, setFlags:{ onFeedbackCouncil:true } },
+        { label:"Сначала собрать предварительную оценку направления (front/back/data/…)", next:"pre_triage", delta:{ day:+1, focus:-5, rep:+1 } },
       ]
     },
 
-    contract: {
+    pre_triage: {
       chapter: 1,
-      title: "Договор",
+      title: "Предварительный triage",
       text:
-`Ты отправляешь договор и отдельным пунктом: “изменения → оценка → согласование”.
-Клиент читает. Долго. Очень долго.
-
-Пауза в переписке ощущается как сквозняк в темноте.`,
+`Вы прикинули: это фронт/бэк/экстракция данных? Нужен ли дизайн? Архитектура?
+Это повышает шансы быстро пройти техком и анализ.`,
       choices: [
-        { label:"Мягко дожать: созвон на 15 минут, чтобы закрыть вопросы", next:"contract_call", delta:{ day:+1, stress:+1, focus:-4 } },
-        { label:"Ждать и параллельно делать только pre-production (без разработки)", next:"preprod", delta:{ day:+1, focus:-2 } },
-        { label:"Согласиться стартовать без договора (быстро-быстро)", next:"no_contract", delta:{ stress:+2, scope:+1, rep:-1 } },
+        { label:"На Совет командования", next:"feedback_council", delta:{ day:+1, rep:+2, focus:-3 }, setFlags:{ onFeedbackCouncil:true } },
       ]
     },
 
-    kickoff: {
+    intake: {
       chapter: 1,
-      title: "Kick-off",
+      title: "Приём запроса",
       text:
-`Команда спрашивает: “что точно в MVP?”. Ты видишь шанс сделать проект конечным.
-Но клиент уже шлёт Figma-ссылки и голосовые.
-
-В одном из голосовых слышится тихое: “и ещё…”`,
+`Вы задаёте правильные вопросы: что болит, у кого, как воспроизвести, что будет “готово”.
+Клиент отвечает вдохновенно. Много слов. Мало критериев.`,
       choices: [
-        { label:"Сформировать MVP (1 страница + 1 форма + 1 интеграция)", next:"mvp_plan", delta:{ day:+1, rep:+1 }, setFlags:{ mvpAgreed:true } },
-        { label:"Начать параллельно: дизайн + dev + контент (потом разберёмся)", next:"parallel", delta:{ scope:+1, stress:+2, focus:-6 } },
-        { label:"Попросить клиента выбрать один KPI и привязать всё к нему", next:"kpi", delta:{ day:+1, stress:+1, rep:+1 } },
+        { label:"Подготовить питч для Совета (что/зачем/эффект/риски)", next:"feedback_council", delta:{ day:+1, focus:-4, rep:+1 }, setFlags:{ onFeedbackCouncil:true } },
+        { label:"Попросить клиента дать конкретный пример/файл/тикер/ISIN (точность)", next:"evidence", delta:{ day:+1, focus:-3, rep:+1 }, req:{ roleAny:true } },
+        { label:"Отложить “на потом”, чтобы не отвлекаться (клиент не поймёт)", next:"client_pressure", delta:{ stress:+2, rep:-1 } },
       ]
     },
 
-    yes_start: {
+    evidence: {
       chapter: 1,
-      title: "Быстрый старт",
+      title: "Доказательства",
       text:
-`Ты говоришь “да”. Клиент отвечает списком из 12 пунктов.
-Почти каждый пункт заканчивается словом “быстро”.
-
-Ты ловишь себя на мысли: проект уже пишет тебе ТЗ.`,
+`У вас есть артефакты: примеры, шаги воспроизведения, бизнес-обоснование.
+Это уменьшает шанс возврата “нужно конкретнее”.`,
       choices: [
-        { label:"Включить режим “приоритеты или ничего”", next:"prio", delta:{ day:+1, stress:+1, rep:+1 } },
-        { label:"Согласиться и “разрулим по ходу”", next:"scope_grows", delta:{ scope:+2, stress:+2, budget:-8, focus:-8 }, setFlags:{ creepAwake:true } },
-        { label:"Схитрить: принять всё, но принести план с этапами", next:"stages", delta:{ day:+1, stress:+1, rep:+1 } },
+        { label:"Вынести на Совет командования уверенно", next:"feedback_council", delta:{ day:+1, rep:+2, focus:-3 }, setFlags:{ onFeedbackCouncil:true } },
+        { label:"Сделать ещё и предварительную оценку сложности", next:"pre_triage", delta:{ day:+1, focus:-4, rep:+1 } },
       ]
     },
 
-    contract_call: {
+    promise: {
       chapter: 1,
-      title: "15 минут созвона",
+      title: "Опасное обещание",
       text:
-`На созвоне появляется ещё один человек: “я тоже отвечаю за продукт”.
-Потом ещё один: “я про бренд”.
-
-И ты понимаешь: стейкхолдеров больше, чем строк в брифе.`,
+`Вы говорите клиенту: “Сделаем быстро”.
+Станция фиксирует обещание как объект, который охотится на план спринта.`,
       choices: [
-        { label:"Зафиксировать роли и единый голос клиента", next:"stakeholders", delta:{ day:+1, stress:+1, rep:+1 }, setFlags:{ stakeholdersAligned:true } },
-        { label:"Вежливо выдержать и пообещать “черновую оценку завтра”", next:"estimate", delta:{ day:+1, stress:+2, focus:-6 } },
-        { label:"Попросить подписать договор сегодня, иначе стоп", next:"hardline", delta:{ stress:+2, rep:+1 }, req:{ focusMin:40 } },
+        { label:"Срочно готовить питч на Совет командования", next:"feedback_council", delta:{ day:+1, stress:+1, focus:-6 }, setFlags:{ onFeedbackCouncil:true, creepAwake:true } },
+        { label:"Попытаться протолкнуть напрямую в IT (мимо Совета)", next:"direct_to_it", delta:{ stress:+2, rep:-1, scope:+1 }, setFlags:{ creepAwake:true } },
       ]
     },
 
-    preprod: {
+    client_pressure: {
       chapter: 1,
-      title: "Pre-production",
+      title: "Давление клиента",
       text:
-`Ты делаешь структуру, риски, план, список вопросов.
-Это скучно. Зато безопасно.
-
-Клиент пишет: “А почему не видно прогресса?”`,
+`Клиент напоминает каждые 3 часа.
+Продажи пишут: “ну что там”.
+Database добавляет: “у нас тоже спрашивают”.`,
       choices: [
-        { label:"Показать прототип и roadmap (без кода)", next:"roadmap_show", delta:{ rep:+1, focus:-2 } },
-        { label:"Сделать “демо” на статике, чтобы снять напряжение", next:"static_demo", delta:{ day:+1, budget:-6, stress:+1, focus:-3 } },
-        { label:"Сдаться и начать разработку без договора", next:"no_contract", delta:{ stress:+2, scope:+1, rep:-1 } },
+        { label:"Всё равно выносить на Совет командования", next:"feedback_council", delta:{ day:+1, stress:+1, focus:-4 }, setFlags:{ onFeedbackCouncil:true } },
+        { label:"Сделать временный workaround (снять давление)", next:"workaround", delta:{ day:+1, budget:-5, stress:+1, rep:+1 } },
       ]
     },
 
-    no_contract: {
+    workaround: {
       chapter: 1,
-      title: "Без договора",
+      title: "Временный обходной манёвр",
       text:
-`Ты стартуешь без формальностей. Оно довольно.
-Внутри проекта появляется новая константа: “можно менять всё”.
-
-И чем меньше правил, тем быстрее растёт то, что ты строишь.`,
+`Вы даёте временное решение.
+Это снижает напряжение… и увеличивает риск вечности.`,
       choices: [
-        { label:"Срочно вернуть процесс изменений (CR) задним числом", next:"change_req", delta:{ day:+1, stress:+1 }, setFlags:{ changeProcess:true, creepAwake:true } },
-        { label:"Продолжать без правил, но ускорить релиз", next:"rush", delta:{ day:+1, stress:+2, focus:-8, scope:+1 }, setFlags:{ creepAwake:true } },
+        { label:"Пока тихо — готовить задачу на Совет", next:"feedback_council", delta:{ day:+1, rep:+1, focus:-3 }, setFlags:{ onFeedbackCouncil:true } },
+        { label:"Оставить как есть и надеяться, что забудут", next:"ending_eternal", delta:{}, ending:true },
       ]
     },
 
-    prio: {
+    feedback_council: {
       chapter: 2,
-      title: "Приоритизация",
+      title: "Совет командования (совещание по фидбэку)",
       text:
-`Ты просишь расставить Must/Should/Could.
-Клиент отвечает: “всё — Must”.
+`В зале командования:
+— генеральный директор Константин Васильев
+— основатель Сергей Лялин
+— коммерческий директор Сергей Зобов
+— руководители и представители по повестке
 
-На секунду тишина становится громче.`,
+Каждый запрос получает решение:
+делаем / не делаем / делаем, но потом.`,
       choices: [
-        { label:"Предложить релиз по этапам (MVP → итерации)", next:"mvp_plan", delta:{ day:+1, stress:+1, rep:+1 }, setFlags:{ mvpAgreed:true } },
-        { label:"Согласиться и “героить” командой", next:"hero", delta:{ stress:+3, budget:-12, focus:-10, rep:-1 } },
-        { label:"Подключить аккаунт/коммерса: пусть подтвердят рамки", next:"account_help", delta:{ day:+1, stress:+1, rep:+1 } },
+        { label:"Защитить запрос: цель → эффект → риски → критерии готовности", next:"council_decision", delta:{ stress:+1, focus:-4, rep:+2 }, setFlags:{ councilDecided:true } },
+        { label:"Промолчать про критерии (потом вернётся на уточнение)", next:"council_decision", delta:{ stress:+2, focus:-6, rep:-1 }, setFlags:{ councilDecided:true, returnedForClarification:true } },
+        { label:"Сыграть на “срочно и важно” (может сработать, но опасно)", next:"council_decision", delta:{ stress:+2, rep:+1, scope:+1 }, setFlags:{ councilDecided:true, creepAwake:true } },
+        { label:"Если вы из Продаж: добавить кейс “клиент уйдёт” (жёстко)", next:"council_decision", delta:{ stress:+2, rep:+2, scope:+1 }, req:{ roleIs:"Продажи" }, setFlags:{ councilDecided:true, creepAwake:true } },
+      ]
+    },
+
+    council_decision: {
+      chapter: 2,
+      title: "Решение Совета",
+      text:
+`Решение принято. На бумаге.
+В реальности приоритет изменится ещё примерно 15 раз.
+
+Дальше: у product owner формируется бэклог задач по приоритетам (до первого “срочно”).`,
+      choices: [
+        { label:"Решение: ДЕЛАЕМ (ставим в бэклог)", next:"backlog", delta:{ rep:+1 }, setFlags:{ decision:"do", backlogFormed:true } },
+        { label:"Решение: ДЕЛАЕМ, НО ПОТОМ (дальний космос)", next:"later_orbit", delta:{ stress:+1, rep:-1 }, setFlags:{ decision:"later", backlogFormed:true } },
+        { label:"Решение: НЕ ДЕЛАЕМ (попробовать переформулировать?)", next:"nope", delta:{ stress:+1, rep:-1 }, setFlags:{ decision:"no" } },
+      ]
+    },
+
+    later_orbit: {
+      chapter: 2,
+      title: "Орбита “потом”",
+      text:
+`Задача отправлена на орбиту “потом”.
+Там уже вращаются десятки таких же задач.`,
+      choices: [
+        { label:"Собрать новые аргументы/кейсы и вернуться на следующий Совет", next:"evidence", delta:{ day:+2, stress:+1, focus:-6, rep:+1 } },
+        { label:"Принять судьбу и уйти дальше", next:"ending_eternal", delta:{}, ending:true },
+      ]
+    },
+
+    nope: {
+      chapter: 2,
+      title: "Не делаем",
+      text:
+`Совет говорит: “не делаем”.
+Иногда “не делаем” можно превратить в “делаем иначе” (меньше, проще, точнее).`,
+      choices: [
+        { label:"Переформулировать как меньший MVP", next:"backlog", delta:{ rep:+1, stress:+1, scope:-1 }, setFlags:{ decision:"do", backlogFormed:true } },
+        { label:"Закрыть запрос клиенту (дипломатично)", next:"ending_neutral", delta:{}, ending:true },
       ]
     },
 
     backlog: {
-      chapter: 2,
-      title: "Backlog всё стерпит",
+      chapter: 3,
+      title: "Бэклог product owner",
       text:
-`Ты говоришь: “давайте позже”. Клиент кивает.
-Но “позже” любит возвращаться ночью.
+`У вас аккуратный бэклог по приоритетам.
+Он будет красивым примерно до первого срочного запроса.
 
-Проект начинает напоминать список обещаний.`,
+Куда маршрутизировать?
+— сложная/концептуальная (“надо подумать”) → Отдел развития
+— простая/фронтовая → на техком IT напрямую`,
       choices: [
-        { label:"Оформить CR-процесс и научить клиента жить с ним", next:"change_req", delta:{ day:+1, rep:+1 }, setFlags:{ changeProcess:true } },
-        { label:"Согласиться на один пункт “прямо сейчас”, чтобы снять давление", next:"scope_grows", delta:{ scope:+1, stress:+1, budget:-6, focus:-5 }, setFlags:{ creepAwake:true } },
-        { label:"Устроить demo-ритм: показываем каждую неделю, без добавлений между", next:"cadence", delta:{ day:+1, rep:+2, stress:+1 } },
+        { label:"Маршрут: концептуальная → Отдел развития", next:"dev_development_techcom", delta:{ day:+1, stress:+1, focus:-4 }, setFlags:{ routedToDevelopment:true } },
+        { label:"Маршрут: на техком IT (и там защита)", next:"techcom_gate_intro", delta:{ day:+1, stress:+1, focus:-4 }, setFlags:{ routedToDev:true } },
+        { label:"Если вы из Database: продавить точность постановки сразу", next:"techcom_gate_intro", delta:{ day:+1, rep:+2, focus:-4 }, req:{ roleIs:"Database" }, setFlags:{ routedToDev:true } },
       ]
     },
 
-    change_req: {
-      chapter: 2,
-      title: "Change Request",
+    dev_development_techcom: {
+      chapter: 3,
+      title: "Техком отдела развития",
       text:
-`Ты оформляешь изменения: влияние на сроки, бюджет, риски.
-Это похоже на магический круг мелом вокруг проекта.
-
-На секунду “оно” отступает.`,
+`На техкоме отдела развития основатель и генеральный директор решают: принимать / не принимать.
+Если приняли — идёт проработка, потом задачи ставятся на IT (а вы ждёте).`,
       choices: [
-        { label:"Зафиксировать подписи и двигаться дальше", next:"stages", delta:{ day:+1, rep:+1 }, setFlags:{ contractSigned:true } },
-        { label:"Подключить юриста/финансы, чтобы закрыть тему навсегда", next:"legal", delta:{ day:+1, stress:+1, rep:+1 }, setFlags:{ legalInvolved:true, contractSigned:true } },
-        { label:"Сделать одно исключение “ради отношений”", next:"scope_grows", delta:{ scope:+1, stress:+2, rep:-1 }, setFlags:{ creepAwake:true } },
+        { label:"Принести чёткую формулировку и добиться принятия", next:"development_accept", delta:{ stress:+1, rep:+1 }, setFlags:{ onTechcom:true } },
+        { label:"Принести “в общих чертах” (вероятен возврат)", next:"development_accept", delta:{ stress:+2, rep:-1, focus:-6 }, setFlags:{ onTechcom:true, returnedForClarification:true } },
       ]
     },
 
-    stakeholders: {
-      chapter: 2,
-      title: "Единый голос",
+    development_accept: {
+      chapter: 3,
+      title: "Решение отдела развития",
       text:
-`Ты предлагаешь правило: один владелец решений, один канал, один статус.
-Стейкхолдеры соглашаются — но неохотно.
-
-Пока они соглашаются, в проекте кто-то переставляет сроки.`,
+`Если приняли — отлично, идёт проработка.
+Если нет — возвращаемся за точностью.`,
       choices: [
-        { label:"Закрепить weekly-статусы и запрет на “срочно” между ними", next:"cadence", delta:{ day:+1, rep:+2, stress:+1 }, setFlags:{ stakeholdersAligned:true } },
-        { label:"Сделать большой воркшоп по целям/метрикам", next:"workshop", delta:{ day:+2, stress:+2, focus:-6, rep:+1 } },
-        { label:"Попросить dev-тимлида озвучить технические ограничения вслух", next:"tech_truth", delta:{ day:+1, stress:+1, rep:+1 }, setFlags:{ devOnYourSide:true } },
+        { label:"Принято! Ждать проработки → постановка на IT", next:"wait_dev_to_it", delta:{ day:+3, stress:+1, focus:-8, rep:+1 }, setFlags:{ developmentAccepted:true } },
+        { label:"Не принято: вернуться и уточнить требования", next:"intake", delta:{ day:+2, stress:+1, focus:-6 }, setFlags:{ returnedForClarification:true } },
+      ]
+    },
+
+    wait_dev_to_it: {
+      chapter: 4,
+      title: "Ожидание: развитие → IT",
+      text:
+`Проработка идёт. Отдел развития занят.
+Ваша задача — дождаться постановки на IT.`,
+      choices: [
+        { label:"Настойчиво пинговать, но дипломатично", next:"techcom_gate_intro", delta:{ day:+2, stress:+1, focus:-6, rep:+1 }, setFlags:{ routedToDev:true } },
+        { label:"Ждать молча (шанс провалиться в “потом”)", next:"later_orbit", delta:{ day:+3, stress:+1, focus:-8 }, setFlags:{ creepAwake:true } },
+      ]
+    },
+
+    /** ===== MINI-GAME: techcom defense ===== */
+    techcom_gate_intro: {
+      chapter: 4,
+      title: "Техком IT — Инженерный совет",
+      text:
+`На техкоме вам нужно пройти мини-защиту из 3 вопросов:
+1) Что именно нужно?
+2) Зачем это нужно?
+3) Почему срочно именно сейчас?
+
+Если ответите слабо — задача часто уезжает в отдел развития или возвращается на уточнение.`,
+      choices: [
+        { label:"Начать защиту на техкоме", next:"techcom_quiz_start", delta:{ stress:+1, focus:-3 }, setFlags:{ onTechcom:true } },
+        { label:"Отложить и принести больше артефактов", next:"evidence", delta:{ day:+1, stress:+1, focus:-4, rep:+1 } },
+      ]
+    },
+
+    techcom_quiz_start: {
+      chapter: 4,
+      title: "Защита на техкоме: вопрос 1/3",
+      text:
+`Вопрос 1: Что именно нужно сделать?`,
+      quiz: {
+        total: 3,
+        questions: [
+          {
+            q: "Вопрос 1: Что именно нужно сделать?",
+            options: [
+              { label:"Чётко: изменить конкретный экран/API/выгрузку + критерии готовности", score:+1 },
+              { label:"Общее: “сделайте чтобы было удобнее”", score:0 },
+              { label:"Мистическое: “оно само понятно”", score:-1 },
+            ]
+          },
+          {
+            q: "Вопрос 2: Зачем это нужно?",
+            options: [
+              { label:"Бизнес-эффект: удержание/конверсия/снижение ручного труда + кто выигрывает", score:+1 },
+              { label:"Потому что клиент просит", score:0 },
+              { label:"Потому что срочно", score:-1 },
+            ]
+          },
+          {
+            q: "Вопрос 3: Почему срочно именно сейчас?",
+            options: [
+              { label:"Есть дедлайн/регуляторика/договорённость, и риск измерим", score:+1 },
+              { label:"Ну… потому что вчера", score:0 },
+              { label:"Срочно, иначе всё пропадёт (без фактов)", score:-1 },
+            ]
+          },
+        ],
+        onPassNext: "tech_analysis_entry",
+        onFailNext: "techcom_fail"
+      },
+      choices: [
+        { label:"Ответить: чётко и по делу", next:"techcom_quiz_answer", quizPick: { qIndex:0, optIndex:0 }, delta:{ rep:+1 } },
+        { label:"Ответить: общими словами", next:"techcom_quiz_answer", quizPick: { qIndex:0, optIndex:1 }, delta:{ stress:+1 } },
+        { label:"Ответить: на вдохновении (плохо)", next:"techcom_quiz_answer", quizPick: { qIndex:0, optIndex:2 }, delta:{ stress:+2 }, setFlags:{ creepAwake:true } },
+      ]
+    },
+
+    techcom_quiz_q2: {
+      chapter: 4,
+      title: "Защита на техкоме: вопрос 2/3",
+      text:`Вопрос 2: Зачем это нужно?`,
+      choices: [
+        { label:"Ответить: с бизнес-эффектом", next:"techcom_quiz_answer", quizPick: { qIndex:1, optIndex:0 }, delta:{ rep:+1 } },
+        { label:"Ответить: “клиент просит”", next:"techcom_quiz_answer", quizPick: { qIndex:1, optIndex:1 }, delta:{ stress:+1 } },
+        { label:"Ответить: “потому что срочно”", next:"techcom_quiz_answer", quizPick: { qIndex:1, optIndex:2 }, delta:{ stress:+2 }, setFlags:{ creepAwake:true } },
+      ]
+    },
+
+    techcom_quiz_q3: {
+      chapter: 4,
+      title: "Защита на техкоме: вопрос 3/3",
+      text:`Вопрос 3: Почему срочно именно сейчас?`,
+      choices: [
+        { label:"Ответить: с фактами (дедлайн/риск/стоимость)", next:"techcom_quiz_answer", quizPick: { qIndex:2, optIndex:0 }, delta:{ rep:+1 } },
+        { label:"Ответить: “вчера”", next:"techcom_quiz_answer", quizPick: { qIndex:2, optIndex:1 }, delta:{ stress:+1 } },
+        { label:"Ответить: “всё пропадёт” (без фактов)", next:"techcom_quiz_answer", quizPick: { qIndex:2, optIndex:2 }, delta:{ stress:+2 }, setFlags:{ creepAwake:true } },
+      ]
+    },
+
+    techcom_quiz_answer: {
+      chapter: 4,
+      title: "Техком: фиксация ответа",
+      text:
+`(служебный узел)`,
+      choices: [
+        { label:"Продолжить", next:"techcom_quiz_next", delta:{} }
+      ]
+    },
+
+    techcom_quiz_next: {
+      chapter: 4,
+      title: "Техком: следующий шаг",
+      text:`(служебный узел)`,
+      choices: [
+        { label:"Дальше", next:"techcom_quiz_next", delta:{} }
+      ]
+    },
+
+    techcom_fail: {
+      chapter: 4,
+      title: "Техком: защита не прошла",
+      text:
+`Инженерный совет не убедился.
+Чаще всего это заканчивается так:
+— “нужно конкретнее” (возврат на уточнение)
+— или “давайте в отдел развития”`,
+      choices: [
+        { label:"Вернули на уточнение → собрать критерии и вернуться", next:"clarify_and_back", delta:{ day:+1, stress:+2, focus:-6, rep:-1 }, setFlags:{ returnedForClarification:true } },
+        { label:"Уехало в отдел развития", next:"dev_development_techcom", delta:{ day:+1, stress:+2, focus:-4, rep:-1 }, setFlags:{ routedToDevelopment:true } },
+      ]
+    },
+
+    tech_analysis_entry: {
+      chapter: 5,
+      title: "Техком пройден: в технический анализ",
+      text:
+`Задачу приняли на техкоме.
+Теперь технический анализ: определить подразделение, уточнить детали, оценить.`,
+      choices: [
+        { label:"Перейти к техническому анализу", next:"tech_analysis", delta:{ day:+1, stress:+1, focus:-4 }, setFlags:{ techcomAccepted:true } }
+      ]
+    },
+
+    /** ===== analysis / assignment / dept branches ===== */
+    tech_analysis: {
+      chapter: 5,
+      title: "Технический анализ",
+      text:
+`Если задача описана размыто — она вернётся на уточнение.
+Если описано хорошо — назначаем направление исполнения и идём к оценке.`,
+      choices: [
+        { label:"Описание точное → назначить направление", next:"assign_dept", delta:{ day:+1, stress:+1, focus:-3, rep:+1 }, setFlags:{ techAnalysisDone:true } },
+        { label:"Описание размыто → вернули на уточнение", next:"clarify_and_back", delta:{ day:+1, stress:+2, focus:-8, rep:-1 }, setFlags:{ returnedForClarification:true } },
+      ]
+    },
+
+    clarify_and_back: {
+      chapter: 5,
+      title: "Вернули на уточнение",
+      text:
+`Комментарий: “нужно конкретнее”.
+Вы уточняете, добавляете критерии, примеры, ограничения.
+После этого — снова техком и мини-защита.`,
+      choices: [
+        { label:"Вернуться на техком и защищать заново", next:"techcom_gate_intro", delta:{ day:+1, stress:+1, focus:-5, rep:+1 } },
+        { label:"Отправить на орбиту “потом”", next:"ending_eternal", delta:{ rep:-1, stress:+1 }, setFlags:{ creepAwake:true }, ending:true },
+      ]
+    },
+
+    assign_dept: {
+      chapter: 5,
+      title: "Назначение направления",
+      text:
+`Куда летит задача? Направление влияет на риски на dev/prod.`,
+      choices: [
+        { label:"Фронт (UI/страницы/формы)", next:"estimate", delta:{ stress:+1 }, setDept:"front" },
+        { label:"Бэк (API/логика/интеграции)", next:"estimate", delta:{ stress:+1 }, setDept:"back" },
+        { label:"Экстракция данных (выгрузки/потоки/ETL)", next:"estimate", delta:{ stress:+2 }, setDept:"data" },
+        { label:"Дизайн (макеты/состояния/UX)", next:"estimate", delta:{ stress:+1, budget:-4 }, setDept:"design" },
+        { label:"Архитектура (системные изменения)", next:"estimate", delta:{ stress:+2, focus:-4 }, setDept:"arch" },
       ]
     },
 
     estimate: {
-      chapter: 2,
+      chapter: 5,
       title: "Оценка",
       text:
-`Ты считаешь трудозатраты. Получается дорого.
-Клиент пишет: “а можно вдвое дешевле и быстрее?”`,
+`Если оценка маленькая — шанс увидеть результат в этой жизни.
+Если большая — задача станет частью истории станции.`,
       choices: [
-        { label:"Урезать скоуп до MVP", next:"mvp_plan", delta:{ scope:-1, stress:+1, rep:+1 }, setFlags:{ mvpAgreed:true } },
-        { label:"Сказать “попробуем ужаться” (опасно)", next:"hero", delta:{ budget:-18, stress:+2, focus:-8, rep:-1 }, setFlags:{ creepAwake:true } },
-        { label:"Поставить выбор: дешевле ИЛИ быстрее", next:"tradeoff", delta:{ day:+1, stress:+1, rep:+1 }, req:{ focusMin:35 } },
+        { label:"Оценка маленькая (есть шанс в этой жизни)", next:"sprint_planning", delta:{ day:+1, stress:+1, focus:-3 }, setFlags:{ estimateSmall:true } },
+        { label:"Оценка большая (легенда станции)", next:"big_estimate", delta:{ day:+1, stress:+2, focus:-4 }, setFlags:{ estimateLarge:true, creepAwake:true } },
+        { label:"Если репутация высокая: продавить дробление в MVP прямо сейчас", next:"sprint_planning", delta:{ day:+1, stress:+1, scope:-1, rep:+1 }, req:{ repMin:4 }, setFlags:{ estimateSmall:true } },
       ]
     },
 
-    mvp_plan: {
-      chapter: 3,
-      title: "MVP-план",
-      text:
-`Ты формулируешь MVP как конечный объект. Это приятно.
-Ты даже видишь дату, когда всё закончится.
-
-Но внутри проекта что-то хихикает.`,
-      choices: [
-        { label:"Дожать MVP и закрыть фазу", next:"build_mvp", delta:{ day:+2, stress:-1, focus:-4, rep:+1 } },
-        { label:"Добавить ещё одну “маленькую” правку перед стартом", next:"scope_grows", delta:{ scope:+1, stress:+1, focus:-4 }, setFlags:{ creepAwake:true } },
-        { label:"Включить QA заранее (чтобы не утонуть в баг-аду)", next:"qa", delta:{ day:+1, budget:-6, rep:+1 }, setFlags:{ qaInvolved:true } },
-      ]
-    },
-
-    stages: {
-      chapter: 3,
-      title: "Этапы",
-      text:
-`Ты приносишь план: MVP → улучшения → экспериментальные хотелки.
-Клиент соглашается (словами).`,
-      choices: [
-        { label:"Устроить первый demo-ритм и держать линию", next:"cadence", delta:{ day:+1, rep:+2, stress:+1 } },
-        { label:"Сделать быстрый “вау-прототип”, чтобы закрепить доверие", next:"wow", delta:{ day:+1, budget:-10, stress:+1, rep:+2 } },
-        { label:"Сразу обозначить конец: критерии приёмки (Definition of Done)", next:"dod", delta:{ day:+1, rep:+2, stress:+1 } },
-      ]
-    },
-
-    cadence: {
-      chapter: 3,
-      title: "Ритм",
-      text:
-`Каждую неделю — демо. Между демо — никаких “ещё чуть-чуть”.
-Это работает… пока клиент не пишет: “Но это же мелочь”.`,
-      choices: [
-        { label:"Ответить: мелочь = CR, без исключений", next:"hold_line", delta:{ rep:+2, stress:+1 }, req:{ flags:["changeProcess"] } },
-        { label:"Сделать одно исключение (чтобы не портить отношения)", next:"scope_grows", delta:{ scope:+1, stress:+2, rep:-1 }, setFlags:{ creepAwake:true } },
-        { label:"Предложить “swap”: добавляем мелочь, но убираем пункт из MVP", next:"swap", delta:{ day:+1, rep:+1, stress:+1 } },
-      ]
-    },
-
-    wow: {
-      chapter: 3,
-      title: "Вау-прототип",
-      text:
-`Ты делаешь эффектное демо. Клиент впечатлён.
-А потом впечатление превращается в ожидание.
-
-Ожидание — любимая пища Скоупа.`,
-      choices: [
-        { label:"Зафиксировать: демо ≠ готовый продукт (и вернуться к плану)", next:"hold_line", delta:{ rep:+1, stress:+1 } },
-        { label:"Продолжать “вауить” (пока не закончится бюджет)", next:"burn", delta:{ budget:-20, stress:+2, focus:-8, rep:+1 }, setFlags:{ creepAwake:true } },
-        { label:"Использовать доверие, чтобы продавить контракт и CR-процесс", next:"legal", delta:{ day:+1, rep:+2 }, req:{ focusMin:30 } },
-      ]
-    },
-
-    dod: {
-      chapter: 3,
-      title: "Definition of Done",
-      text:
-`Ты пишешь критерии готовности: что значит “сделано”.
-Слова выглядят как замок на двери.
-
-За дверью что-то ходит кругами.`,
-      choices: [
-        { label:"Согласовать и подписать критерии", next:"build_mvp", delta:{ day:+1, rep:+2, stress:+1 }, setFlags:{ contractSigned:true } },
-        { label:"Оставить как “рекомендацию”, чтобы не спорить", next:"scope_grows", delta:{ scope:+1, stress:+2, rep:-1 }, setFlags:{ creepAwake:true } },
-      ]
-    },
-
-    account_help: {
-      chapter: 2,
-      title: "Подключение аккаунта",
-      text:
-`Аккаунт-менеджер умеет говорить “нет” так, что это звучит как забота.
-Клиент чуть смягчается.
-
-Но проект уже запомнил твой первый “да”.`,
-      choices: [
-        { label:"Вернуть разговор к KPI и MVP", next:"mvp_plan", delta:{ day:+1, rep:+2, stress:+1 }, setFlags:{ mvpAgreed:true } },
-        { label:"Согласовать компромисс: 2 Must, остальное в итерации", next:"stages", delta:{ day:+1, rep:+2, stress:+1 } },
-        { label:"Незаметно пообещать “ещё одну мелочь” (опасно)", next:"scope_grows", delta:{ scope:+1, stress:+2, rep:-1 }, setFlags:{ creepAwake:true } },
-      ]
-    },
-
-    kpi: {
-      chapter: 2,
-      title: "Один KPI",
-      text:
-`Ты просишь выбрать одну метрику.
-Клиент выбирает две. Потом три.
-
-КPI начинают плодиться, как требования.`,
-      choices: [
-        { label:"Свести к одному “главному” и остальные — вторичные", next:"mvp_plan", delta:{ day:+1, rep:+1, stress:+1 }, setFlags:{ mvpAgreed:true } },
-        { label:"Согласиться на несколько KPI и увеличить бюджет/срок", next:"tradeoff", delta:{ day:+1, stress:+1, rep:+1 } },
-        { label:"Сделать A/B как эксперимент позже (после MVP)", next:"stages", delta:{ day:+1, rep:+2, stress:+1 } },
-      ]
-    },
-
-    tech_truth: {
-      chapter: 3,
-      title: "Техническая правда",
-      text:
-`Тимлид говорит: “это нельзя сделать быстро и качественно”.
-В комнате появляется редкая вещь — реальность.
-
-Реальность раздражает Скоуп.`,
-      choices: [
-        { label:"Сделать “выбор ограничений” клиенту: быстро/дёшево/качественно", next:"tradeoff", delta:{ day:+1, rep:+2, stress:+1 } },
-        { label:"Спрятать правду, чтобы не спорить (плохая идея)", next:"hero", delta:{ stress:+3, rep:-2, focus:-8 }, setFlags:{ creepAwake:true } },
-        { label:"Предложить альтернативу: проще архитектура, меньше функций", next:"mvp_plan", delta:{ day:+1, rep:+2, stress:+1 }, setFlags:{ mvpAgreed:true } },
-      ]
-    },
-
-    tradeoff: {
-      chapter: 3,
-      title: "Треугольник",
-      text:
-`Ты ставишь выбор: либо быстрее, либо дешевле, либо богаче по функционалу.
-Клиент молчит. Потом пишет: “а нельзя всё сразу?”.`,
-      choices: [
-        { label:"Твёрдо: нельзя. Выберите два.", next:"hold_line", delta:{ rep:+2, stress:+1 }, req:{ focusMin:30 } },
-        { label:"Согласиться “попробовать” (оно довольно)", next:"burn", delta:{ stress:+2, budget:-12, focus:-10 }, setFlags:{ creepAwake:true } },
-        { label:"Предложить: “всё сразу” = больше бюджета/срока", next:"pitch", delta:{ day:+1, rep:+1, stress:+1 } },
-      ]
-    },
-
-    hardline: {
-      chapter: 2,
-      title: "Жёсткая линия",
-      text:
-`Ты говоришь: “без подписи — стоп”.
-На секунду кажется, что ты победил.
-Потом приходит сообщение: “Ок. Подпишем.”
-
-Скоуп замирает. И делает пометку.`,
-      choices: [
-        { label:"Подписали. Вернуться к MVP и CR", next:"mvp_plan", delta:{ day:+1, rep:+2, stress:+1 }, setFlags:{ contractSigned:true, changeProcess:true, mvpAgreed:true } },
-        { label:"Отпраздновать победу маленькой уступкой (не делай этого)", next:"scope_grows", delta:{ scope:+1, stress:+2, rep:-1 }, setFlags:{ creepAwake:true } },
-      ]
-    },
-
-    roadmap_show: {
-      chapter: 2,
-      title: "Roadmap",
-      text:
-`Ты показываешь план: что когда и почему.
-Клиент впервые задаёт правильный вопрос: “а что мы НЕ делаем?”`,
-      choices: [
-        { label:"Ответить честно и зафиксировать “не делаем” письменно", next:"frame", delta:{ rep:+2, stress:+1 } },
-        { label:"Сказать “посмотрим” (и открыть дверь)", next:"scope_grows", delta:{ scope:+1, stress:+1, rep:-1 }, setFlags:{ creepAwake:true } },
-      ]
-    },
-
-    static_demo: {
-      chapter: 2,
-      title: "Статичное демо",
-      text:
-`Ты делаешь имитацию прогресса. Это работает. На день.
-Потом клиент спрашивает: “а где админка?”.`,
-      choices: [
-        { label:"Объяснить, что админка не в scope. Оформить CR.", next:"change_req", delta:{ day:+1, rep:+1, stress:+1 }, setFlags:{ changeProcess:true } },
-        { label:"Пообещать админку “минимальную” (опасно)", next:"scope_grows", delta:{ scope:+2, stress:+2, budget:-10, rep:-1 }, setFlags:{ creepAwake:true } },
-      ]
-    },
-
-    qa: {
-      chapter: 3,
-      title: "QA подключён",
-      text:
-`QA задаёт неприятные вопросы, но спасает от релиза-кошмара.
-Проект ненавидит QA.
-
-Проект любит баги: баги — это повод добавить функциональность.`,
-      choices: [
-        { label:"Закрепить гейт: без QA — не релиз", next:"build_mvp", delta:{ day:+1, rep:+2, stress:+1 } },
-        { label:"Отключить QA “пока”, чтобы успеть (не надо)", next:"rush", delta:{ stress:+2, rep:-2, focus:-8 }, setFlags:{ creepAwake:true } },
-      ]
-    },
-
-    build_mvp: {
-      chapter: 4,
-      title: "Сборка MVP",
-      text:
-`Вы приближаетесь к релизу.
-Но чем ближе релиз — тем активнее шевелится “оно”.
-
-Скоуп начинает разговаривать фразами клиента.`,
-      choices: [
-        { label:"Сделать релиз-кандидат и заморозить изменения", next:"freeze", delta:{ day:+1, stress:+1, rep:+2 } },
-        { label:"Пустить маленькую правку перед релизом (ошибка)", next:"scope_grows", delta:{ scope:+1, stress:+2, focus:-6, rep:-1 }, setFlags:{ creepAwake:true } },
-        { label:"Попросить клиента подтвердить критерии приёмки сейчас", next:"acceptance", delta:{ day:+1, stress:+1, rep:+2 }, req:{ flags:["contractSigned"] } },
-      ]
-    },
-
-    freeze: {
-      chapter: 4,
-      title: "Заморозка",
-      text:
-`Ты объявляешь freeze. Команда выдыхает.
-Клиент пишет: “но вот это точно можно успеть, это же мелочь”.
-
-Скоуп улыбается — чуть заметно.`,
-      choices: [
-        { label:"Нет. Freeze есть freeze.", next:"release", delta:{ stress:+1, rep:+2 } },
-        { label:"Ок, одна мелочь (и всё)", next:"scope_grows", delta:{ scope:+1, stress:+2, rep:-1 }, setFlags:{ creepAwake:true } },
-        { label:"Вариант: перенести мелочь в релиз+1 (официально)", next:"release", delta:{ rep:+2, stress:+1 }, req:{ flags:["changeProcess"] } },
-      ]
-    },
-
-    acceptance: {
-      chapter: 4,
-      title: "Приёмка",
-      text:
-`Ты просишь подтвердить критерии. Клиент отвечает: “да”.
-Потом пишет: “а можно ещё один сценарий?”
-
-Тишина. Потом шорох страниц.`,
-      choices: [
-        { label:"Это CR в релиз+1. Сейчас выпускаем.", next:"release", delta:{ rep:+2, stress:+1 } },
-        { label:"Добавить сценарий, но убрать другой (swap)", next:"swap", delta:{ day:+1, stress:+1, rep:+1 } },
-      ]
-    },
-
-    swap: {
-      chapter: 4,
-      title: "Swap",
-      text:
-`Ты предлагаешь обмен: добавляем X, убираем Y.
-Клиент впервые задумывается, что “всё” не помещается в “сейчас”.`,
-      choices: [
-        { label:"Клиент выбирает: выкидываем лишнее → выпускаем", next:"release", delta:{ rep:+2, stress:+1 } },
-        { label:"Клиент не выбирает и просит “оставить всё”", next:"burn", delta:{ stress:+2, focus:-8, budget:-10 }, setFlags:{ creepAwake:true } },
-      ]
-    },
-
-    hold_line: {
-      chapter: 3,
-      title: "Держать линию",
-      text:
-`Ты не сдаёшься. Ты говоришь “таков процесс”.
-И внезапно оказывается, что мир не рушится.
-
-Скоуп отступает. На шаг.`,
-      choices: [
-        { label:"Вернуться к MVP и завершить фазу", next:"build_mvp", delta:{ day:+1, stress:-1, rep:+2, focus:+4 } },
-        { label:"Закрепить успех: правила, статусы, CR, приёмка", next:"fortify", delta:{ day:+1, rep:+3, stress:+1 }, setFlags:{ changeProcess:true, contractSigned:true, stakeholdersAligned:true } },
-      ]
-    },
-
-    legal: {
-      chapter: 3,
-      title: "Юрист в переписке",
-      text:
-`Юрист пишет вежливо, но холодно.
-Проект перестаёт расширяться “просто так”.
-
-Где-то в документе кто-то стирает слово “мелочь”.`,
-      choices: [
-        { label:"Подписать всё и двигаться к MVP", next:"mvp_plan", delta:{ day:+1, rep:+2, stress:+1 }, setFlags:{ contractSigned:true, changeProcess:true } },
-        { label:"Сделать паузу и пересобрать ожидания клиенту письмом", next:"reset_mail", delta:{ day:+1, rep:+2, stress:+1 } },
-      ]
-    },
-
-    reset_mail: {
-      chapter: 3,
-      title: "Письмо-пересборка",
-      text:
-`Ты пишешь коротко: цели, рамки, этапы, ответственность.
-Клиент отвечает: “Спасибо. Так понятнее.”
-
-Впервые за долгое время ты чувствуешь контроль.`,
-      choices: [
-        { label:"Идти в сборку MVP", next:"build_mvp", delta:{ day:+1, rep:+2, stress:-1, focus:+6 } },
-        { label:"Сделать финальный воркшоп со стейкхолдерами", next:"workshop", delta:{ day:+2, stress:+2, rep:+2 } },
-      ]
-    },
-
-    workshop: {
-      chapter: 3,
-      title: "Воркшоп",
-      text:
-`Вы обсуждаете цели. Кто-то признаётся: “я думал, это другой продукт”.
-Это больно. Но полезно.
-
-Скоуп не любит правду.`,
-      choices: [
-        { label:"Свести ожидания и зафиксировать единый backlog", next:"fortify", delta:{ day:+1, rep:+3, stress:+1, focus:+4 }, setFlags:{ stakeholdersAligned:true } },
-        { label:"Сделать компромисс: MVP меньше, но релиз быстрее", next:"build_mvp", delta:{ day:+1, stress:+1, rep:+2 } },
-      ]
-    },
-
-    fortify: {
-      chapter: 4,
-      title: "Укрепление",
-      text:
-`Процесс есть. Роли есть. CR есть.
-Скоуп нервничает. Он не привык к границам.
-
-И всё же он пытается.`,
-      choices: [
-        { label:"Выпустить MVP по процессу", next:"release", delta:{ day:+1, rep:+3, stress:-1, focus:+4 } },
-        { label:"Рискнуть “ещё одной мелочью” (не надо)", next:"scope_grows", delta:{ scope:+1, stress:+2, rep:-1 }, setFlags:{ creepAwake:true } },
-      ]
-    },
-
-    rush: {
-      chapter: 3,
-      title: "Гонка",
-      text:
-`Вы ускоряетесь. Текст не успевает за решениями.
-Фокус падает. Ошибки множатся.
-
-В какой-то момент проект начинает решать за тебя.`,
-      choices: [
-        { label:"Остановить, пересобрать план и включить процесс", next:"hold_line", delta:{ day:+1, stress:+2, rep:+1 }, req:{ focusMin:20 } },
-        { label:"Ещё один рывок", next:"burn", delta:{ day:+1, stress:+3, budget:-12, focus:-10 }, setFlags:{ creepAwake:true } },
-      ]
-    },
-
-    hero: {
-      chapter: 3,
-      title: "Героизм",
-      text:
-`Команда задерживается. Ты закрываешь задачи собой.
-Тебя хвалят — и добавляют ещё задач.
-
-Скоуп любит героев. Их проще расходовать.`,
-      choices: [
-        { label:"Остановиться и вернуть границы", next:"hold_line", delta:{ day:+1, stress:+1, rep:+1 } },
-        { label:"Продолжать героить", next:"burn", delta:{ day:+1, stress:+3, budget:-10, focus:-10 }, setFlags:{ creepAwake:true } },
-        { label:"Тайно выкинуть часть задач (чтобы выжить)", next:"secret_cut", delta:{ rep:-2, stress:+1, focus:+2 }, req:{ stressMax:12 } },
-      ]
-    },
-
-    secret_cut: {
-      chapter: 4,
-      title: "Тайный вырез",
-      text:
-`Ты вырезаешь часть требований, никому не сказав.
-Это помогает. На время.
-
-Но проект запоминает предательство.`,
-      choices: [
-        { label:"Признаться и оформить честный swap", next:"swap", delta:{ day:+1, rep:+1, stress:+2 } },
-        { label:"Удержать секрет и дожать релиз", next:"release", delta:{ rep:-1, stress:+2 } },
-      ]
-    },
-
-    burn: {
-      chapter: 4,
-      title: "Выгорание бюджета",
-      text:
-`Бюджет тоньше. Фокус ниже. Стресс выше.
-Скоуп становится… конкретнее.
-
-Он перестаёт быть метафорой.`,
-      choices: [
-        { label:"Позвать помощь (команда/аккаунт/юрист) и заморозить изменения", next:"fortify", delta:{ day:+1, rep:+1, stress:+2 }, req:{ budgetMin:10 } },
-        { label:"Попытаться релизнуться “как есть”", next:"release", delta:{ day:+1, stress:+1 } },
-        { label:"Сдаться: проект становится вечным", next:"ending_eternal", delta:{}, ending:true },
-      ]
-    },
-
-    scope_grows: {
-      chapter: 4,
-      title: "Скоуп растёт",
-      text:
-`Добавилась “маленькая фича”.
-Потом ещё одна.
-Потом ещё.
-
-Проект начал разговаривать твоими сообщениями.`,
-      choices: [
-        { label:"Вернуть контроль: правила, CR, freeze", next:"fortify", delta:{ day:+1, stress:+2, rep:+1 }, setFlags:{ changeProcess:true } },
-        { label:"Продолжать молча. Просто продолжать.", next:"ending_eternal", delta:{}, ending:true },
-        { label:"Ход отчаяния: продать клиенту новый бюджет (официально)", next:"pitch", delta:{ day:+1, stress:+2, rep:+1 }, req:{ repMin:-2 } },
-      ]
-    },
-
-    pitch: {
-      chapter: 4,
-      title: "Перепродажа",
-      text:
-`Ты предлагаешь: “хотите больше — нужно больше ресурса”.
-Клиент либо соглашается, либо уходит.
-
-И вот тут твоя дипломатия решает всё.`,
-      choices: [
-        { label:"Клиент соглашается. Вы спасены.", next:"release", delta:{ budget:+25, rep:+3, stress:-1 }, setFlags:{ pitchWon:true } },
-        { label:"Клиент торгуется. Вы режете MVP.", next:"build_mvp", delta:{ scope:-1, rep:+1, stress:+1 } },
-        { label:"Клиент отказывается. Проект пожирает команду.", next:"ending_eternal", delta:{}, ending:true },
-      ]
-    },
-
-    release: {
+    big_estimate: {
       chapter: 5,
-      title: "Релиз",
+      title: "Большая оценка",
       text:
-`Вы выпускаете продукт.
-Команда выдыхает.
-Клиент доволен (или делает вид).
-
-Скоуп отступает в темноту документа… пока вы не откроете следующий проект.`,
+`Большую задачу можно:
+— дробить на этапы (MVP)
+— ждать окна в спринте
+— отправлять в “потом”`,
       choices: [
-        { label:"Финал: зрелый менеджмент (хорошая концовка)", next:"ending_win", delta:{}, ending:true },
-        { label:"Сделать релиз+1 “быстро-быстро” (проверить судьбу)", next:"ending_bittersweet", delta:{}, ending:true },
+        { label:"Разбить на этапы (MVP → потом)", next:"sprint_planning", delta:{ scope:-1, rep:+1, stress:+1 }, setFlags:{ estimateSmall:true } },
+        { label:"Ждать места в спринте как есть", next:"sprint_planning", delta:{ stress:+1, focus:-4 }, setFlags:{ creepAwake:true } },
+        { label:"Орбита “потом”", next:"ending_eternal", delta:{ rep:-1 }, setFlags:{ creepAwake:true }, ending:true },
+      ]
+    },
+
+    sprint_planning: {
+      chapter: 6,
+      title: "Сборка спринта — Полётный план",
+      text:
+`Раз в две недели: генеральный директор, руководитель развития, технический директор, техлиды, дизайнер, архитектор.
+Начинается интеллигентная борьба за ресурсы.`,
+      choices: [
+        { label:"Защитить задачу и выбить место в спринте", next:"in_sprint", delta:{ stress:+2, focus:-6, rep:+2 }, setFlags:{ inSprint:true } },
+        { label:"Не выбить место → ждать следующей сборки", next:"next_cycle", delta:{ day:+7, stress:+1, focus:-6, rep:-1 }, setFlags:{ creepAwake:true } },
+        { label:"Компромисс: урезать объём ради попадания в спринт", next:"in_sprint", delta:{ scope:-1, stress:+1, rep:+1 }, setFlags:{ inSprint:true } },
+      ]
+    },
+
+    next_cycle: {
+      chapter: 6,
+      title: "Следующий цикл",
+      text:
+`Спринт собран без вашей задачи.
+Есть несколько дней на корректировки: можно написать генеральному директору и попросить поменять план.`,
+      choices: [
+        { label:"Попросить корректировку (дипломатия в вакууме)", next:"tweak_attempt", delta:{ day:+2, stress:+1, focus:-4 } },
+        { label:"Ждать следующую сборку спринта", next:"sprint_planning", delta:{ day:+12, stress:+1, focus:-6 } },
+      ]
+    },
+
+    tweak_attempt: {
+      chapter: 6,
+      title: "Корректировки после сборки",
+      text:
+`Иногда получается, иногда — нет. Это нормально.`,
+      choices: [
+        { label:"Удалось! Включили задачу", next:"in_sprint", delta:{ rep:+2, stress:+1 }, setFlags:{ inSprint:true, sprintTweaked:true } },
+        { label:"Не удалось. Возвращаемся в очередь", next:"sprint_planning", delta:{ rep:-1, stress:+1, focus:-3 } },
+      ]
+    },
+
+    in_sprint: {
+      chapter: 7,
+      title: "Задача в спринте",
+      text:
+`Задача в плане.
+Но немедленные задачи могут появиться внезапно и вытеснить менее приоритетные.
+
+В понедельник: демо + ретро.`,
+      choices: [
+        { label:"Начать спринт: демо + ретро", next:"demo_retro", delta:{ day:+1, stress:+1, focus:-4 }, setFlags:{ demoDone:true, retroDone:true } },
+        { label:"Немедленная задача (авария) вытесняет план", next:"immediate_task", delta:{ stress:+3, focus:-8 }, setFlags:{ immediateTaskHit:true } },
+        { label:"Задачу исключили из спринта (решение основателя)", next:"sprint_cut", delta:{ stress:+2, rep:-1 }, setFlags:{ sprintCut:true } },
+      ]
+    },
+
+    sprint_cut: {
+      chapter: 7,
+      title: "Исключили из спринта",
+      text:
+`Вы можете злиться и понимать одновременно.
+Задача снова в очереди.`,
+      choices: [
+        { label:"Вернуться к сборке следующего спринта", next:"sprint_planning", delta:{ day:+12, stress:+1, focus:-6 } },
+        { label:"Переупаковать как “немедленную” (опасно)", next:"immediate_task", delta:{ stress:+2, rep:-1, scope:+1 }, setFlags:{ creepAwake:true } },
+      ]
+    },
+
+    immediate_task: {
+      chapter: 7,
+      title: "Немедленная задача",
+      text:
+`Все ресурсы уходят на тушение пожара.
+Плановые задачи отъезжают.`,
+      choices: [
+        { label:"Пережить аварию и вернуться к плановым", next:"sprint_planning", delta:{ day:+5, stress:+2, focus:-8 } },
+        { label:"Использовать инцидент, чтобы усилить приоритет вашей задачи", next:"sprint_planning", delta:{ rep:+1, stress:+1 } },
+      ]
+    },
+
+    demo_retro: {
+      chapter: 8,
+      title: "Демо и ретро",
+      text:
+`Что сделали, что не сделали, и почему опять не сделали “самое важное”.`,
+      choices: [
+        { label:"Отправить задачу в разработку", next:"dev_work", delta:{ day:+1, stress:+1, focus:-4 } },
+        { label:"Ещё раз защитить приоритет (если риск вылета)", next:"in_sprint", delta:{ stress:+2, focus:-4, rep:+1 } },
+      ]
+    },
+
+    dev_work: {
+      chapter: 9,
+      title: "Разработка",
+      text:
+`Разработчик делает магию и отдаёт на dev.
+На dev почти всегда находятся баги/неточности/“я имел в виду другое”.`,
+      choices: [
+        { label:"Тестировать на dev строго по критериям", next:"dev_test", delta:{ day:+2, stress:+1, focus:-4, rep:+1 }, setFlags:{ onDev:true } },
+        { label:"Срезать тесты ради скорости (опасно)", next:"prod_push", delta:{ day:+1, stress:+2, focus:-6, rep:-1 }, setFlags:{ onDev:true, creepAwake:true } },
+        { label:"Если направление — data: заранее добавить контрольные выборки (умно)", next:"dev_test", delta:{ day:+1, stress:+1, rep:+2 }, req:{ deptIs:"data" }, setFlags:{ onDev:true } },
+      ]
+    },
+
+    dev_test: {
+      chapter: 10,
+      title: "Тестирование на dev",
+      text:
+`Почти всегда что-то находится.
+Запускается цикл доработок.`,
+      choices: [
+        { label:"Найти баги и вернуть в доработку", next:"rework_loop", delta:{ day:+1, stress:+2, focus:-5 }, setFlags:{ bugsFound:true } },
+        { label:"Выглядит хорошо → на prod", next:"prod_push", delta:{ day:+1, stress:+1, focus:-3, rep:+1 } },
+        { label:"Если направление — front: попросить дизайн-ревью перед prod", next:"prod_push", delta:{ day:+1, stress:+1, rep:+1 }, req:{ deptIs:"front" } },
+      ]
+    },
+
+    rework_loop: {
+      chapter: 10,
+      title: "Цикл доработок",
+      text:
+`Доработка → dev → проверка… пока ответственный не будет доволен.`,
+      choices: [
+        { label:"Снова проверить на dev", next:"dev_test", delta:{ day:+1, stress:+1, focus:-3 } },
+        { label:"Хватит. На prod (риск)", next:"prod_push", delta:{ day:+1, stress:+2, rep:-1 }, setFlags:{ creepAwake:true } },
+      ]
+    },
+
+    prod_push: {
+      chapter: 11,
+      title: "Prod — открытый космос",
+      text:
+`Код на prod. Проверяем уже там.
+Если не всё хорошо — назад в цикл.`,
+      choices: [
+        { label:"На prod всё хорошо → закрыть задачу", next:"done", delta:{ day:+1, stress:-2, rep:+2, focus:+6 }, setFlags:{ onProd:true, done:true } },
+        { label:"На prod не всё хорошо → обратно", next:"rework_loop", delta:{ day:+1, stress:+2, focus:-6 }, setFlags:{ onProd:true, bugsFound:true } },
+        { label:"Если направление — arch: включить дополнительную проверку (спасает)", next:"done", delta:{ day:+1, stress:-1, rep:+3 }, req:{ deptIs:"arch" }, setFlags:{ onProd:true, done:true } },
+      ]
+    },
+
+    done: {
+      chapter: 12,
+      title: "Задача закрыта",
+      text:
+`Ответственный обновляет клиентские запросы.
+Продажи сообщают клиенту: “мы это сделали”.`,
+      choices: [
+        { label:"Сообщить продажам и закрыть запрос", next:"ending_win", delta:{ rep:+1 }, setFlags:{ salesNotified:true }, ending:true },
+        { label:"Сделать постмортем и улучшить процесс", next:"ending_best", delta:{ rep:+2, focus:+4 }, ending:true },
+        { label:"Открыть следующий запрос (проверить судьбу)", next:"start", delta:{ day:+1, stress:+1, scope:+1 }, setFlags:{ creepAwake:true } },
       ]
     },
 
     ending_win: {
-      chapter: 6,
-      title: "Финал: Проект завершён",
+      chapter: 13,
+      title: "Финал: Полёт завершён",
       text:
-`Ты удержал границы. Ты сделал процесс. Ты выпустил MVP.
-Скоуп не победил. На этот раз.
+`Вы провели запрос через Совет → техком → анализ → спринт → dev → prod.
+Клиент уведомлён. Станция выжила.
 
-(Но он запомнил твоё имя.)`,
+Где-то уже набирается сообщение: “а можно ещё, быстро и бесплатно?”`,
       ending:true
     },
 
-    ending_bittersweet: {
-      chapter: 6,
-      title: "Финал: Релиз+1",
+    ending_best: {
+      chapter: 13,
+      title: "Финал: Орбитальная стабильность",
       text:
-`Релиз успешен. Ты сразу обещаешь “следующую итерацию”.
-Скоуп улыбается, но тихо. Он терпелив.
-
-Ведь теперь у него есть план.`,
+`Задача сделана, клиент доволен, процесс стал чуть лучше.
+В космосе это редкость: победа не только над задачей, но и над хаосом.`,
       ending:true
     },
 
-    ending_eternal: {
-      chapter: 6,
-      title: "Финал: Вечная доработка",
+    ending_neutral: {
+      chapter: 13,
+      title: "Финал: Нейтральная орбита",
       text:
-`“Ещё чуть-чуть” превращается в “ещё один спринт”.
-Проект становится процессом. Процесс становится жизнью.
-
-Скоуп больше не за дверью. Он в комнате.`,
+`Вы отказали корректно и сохранили отношения.
+Иногда это самый правильный релиз.`,
       ending:true
+    },
+
+    direct_to_it: {
+      chapter: 2,
+      title: "Прямо в IT, минуя космическую бюрократию",
+      text:
+`Иногда это работает для совсем простых задач.
+Но если задача “надо подумать” — она возвращается бумерангом.`,
+      choices: [
+        { label:"Повезло: простое → всё равно на техком (с защитой)", next:"techcom_gate_intro", delta:{ day:+1, stress:+1, rep:+1 }, setFlags:{ routedToDev:true } },
+        { label:"Не повезло: “надо подумать” → уехало в развитие", next:"dev_development_techcom", delta:{ day:+1, stress:+2, rep:-1 }, setFlags:{ routedToDevelopment:true, creepAwake:true } },
+      ]
     },
   }
 };
@@ -1216,42 +1247,63 @@ const story = {
 const $ = (id)=>document.getElementById(id);
 
 const el = {
+  overlay: $("overlay"),
+  btnNew: $("btnNew"),
+  btnContinue: $("btnContinue"),
+  btnResetSave: $("btnResetSave"),
+  audioToggle2: $("audioToggle2"),
+  typeToggle2: $("typeToggle2"),
+
   glitch: $("glitch"),
   title: $("gameTitle"),
   sub: $("gameSub"),
+
   nodeTitle: $("nodeTitle"),
   nodeText: $("nodeText"),
   nodeMeta: $("nodeMeta"),
   nodeBadge: $("nodeBadge"),
   whisper: $("whisper"),
   choices: $("choices"),
+
   restart: $("restartBtn"),
+  continueBtn: $("continueBtn"),
   back: $("backBtn"),
   skip: $("skipBtn"),
+
+  stRole: $("stRole"),
   stDay: $("stDay"),
   stBudget: $("stBudget"),
   stStress: $("stStress"),
   stScope: $("stScope"),
   stFocus: $("stFocus"),
+
   creepBar: $("creepBar"),
   creepLabel: $("creepLabel"),
   creepHint: $("creepHint"),
   riskVal: $("riskVal"),
   repVal: $("repVal"),
+
   dots: $("dots"),
   stepsNow: $("stepsNow"),
   stepsMax: $("stepsMax"),
   log: $("log"),
+
   audioToggle: $("audioToggle"),
   typeToggle: $("typeToggle"),
+
+  pillRole: $("pillRole"),
   pillDay: $("pillDay"),
   pillBudget: $("pillBudget"),
   pillStress: $("pillStress"),
   pillScope: $("pillScope"),
+
+  deptHint: $("deptHint"),
 };
 
+const SAVE_KEY = "cbonds_orbit_backlog_save_v1";
+
 let state = structuredClone(story.initialState);
-let currentId = "start";
+let currentId = "prologue";
 let history = [];
 let typing = { running:false, fullText:"", idx:0, timer:null };
 
@@ -1281,33 +1333,15 @@ const Audio = (() => {
 
 function clamp(n, a=-9999, b=9999){ return Math.max(a, Math.min(b, n)); }
 function num(v){ return (typeof v==="number" && !Number.isNaN(v)) ? v : 0; }
-
-function hasFlags(reqFlags=[]){
-  for (const f of reqFlags){
-    if (!state.flags[f]) return false;
-  }
-  return true;
-}
-
-function meetsReq(req){
-  if (!req) return true;
-  if (req.dayMin != null && state.day < req.dayMin) return false;
-  if (req.budgetMin != null && state.budget < req.budgetMin) return false;
-  if (req.stressMax != null && state.stress > req.stressMax) return false;
-  if (req.focusMin != null && state.focus < req.focusMin) return false;
-  if (req.scopeMax != null && state.scope > req.scopeMax) return false;
-  if (req.repMin != null && state.rep < req.repMin) return false;
-  if (req.flags && !hasFlags(req.flags)) return false;
-  return true;
+function escapeHtml(s){
+  return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
 }
 
 function applyDelta(delta){
   if (!delta) return;
   for (const [k, dv] of Object.entries(delta)){
-    if (k==="flags") continue;
     state[k] = clamp(num(state[k]) + num(dv));
   }
-  // keep within reasonable ranges
   state.focus = clamp(state.focus, 0, 120);
   state.stress = clamp(state.stress, 0, 30);
   state.scope = clamp(state.scope, 0, 30);
@@ -1321,11 +1355,19 @@ function setFlags(obj){
     state.flags[k] = !!v;
   }
 }
+function setRole(role){
+  state.role = role || "—";
+}
+function setDept(dept){
+  state.flags.routedToDevDept = dept || "";
+}
 
 function creepScore(){
-  // combine stress + scope and low focus as “creep”
   const s = state.stress*3 + state.scope*2 + Math.max(0, 70 - state.focus)*0.6;
-  return clamp(Math.round(s), 0, 100);
+  // dept amplifiers (data/arch more fragile)
+  const dept = state.flags.routedToDevDept;
+  const amp = dept === "data" ? 6 : dept === "arch" ? 5 : dept === "back" ? 3 : dept === "front" ? 2 : 0;
+  return clamp(Math.round(s + amp), 0, 100);
 }
 
 function labelRisk(){
@@ -1334,7 +1376,6 @@ function labelRisk(){
   if (c < 55) return ["средний", "warn"];
   return ["высокий", "bad"];
 }
-
 function labelRep(){
   if (state.rep >= 6) return "сильная";
   if (state.rep >= 2) return "ровная+";
@@ -1342,56 +1383,60 @@ function labelRep(){
   if (state.rep >= -5) return "напряжённая";
   return "хрупкая";
 }
-
-function updateTopPills(){
-  el.stDay.textContent = state.day;
-  el.stBudget.textContent = state.budget;
-  el.stStress.textContent = state.stress;
-  el.stScope.textContent = state.scope;
-  el.stFocus.textContent = state.focus;
-
-  // dots
-  const [riskTxt, riskLvl] = labelRisk();
-  const pillDots = [
-    [el.pillDay, "ok"],
-    [el.pillBudget, state.budget >= 40 ? "ok" : state.budget >= 15 ? "warn" : "bad"],
-    [el.pillStress, state.stress <= 6 ? "ok" : state.stress <= 12 ? "warn" : "bad"],
-    [el.pillScope, state.scope <= 3 ? "ok" : state.scope <= 6 ? "warn" : "bad"],
-  ];
-  for (const [pill, lvl] of pillDots){
-    const d = pill.querySelector(".dot");
-    d.className = "dot " + (lvl==="ok" ? "ok" : lvl==="warn" ? "warn" : "bad");
-  }
-
-  // right panel
-  const c = creepScore();
-  el.creepBar.style.width = c + "%";
-  if (c < 28){ el.creepLabel.textContent = "спокоен"; el.creepHint.textContent = "Пока границы держатся."; }
-  else if (c < 55){ el.creepLabel.textContent = "шевелится"; el.creepHint.textContent = "Скоуп ищет лазейки."; }
-  else { el.creepLabel.textContent = "проснулся"; el.creepHint.textContent = "Оно вмешивается всё чаще."; }
-
-  el.riskVal.textContent = riskTxt;
-  el.repVal.textContent = labelRep();
+function deptHuman(){
+  const d = state.flags.routedToDevDept;
+  if (d==="front") return "Фронт: риск “визуально ок, логика спорит”";
+  if (d==="back") return "Бэк: риск “интеграции и крайние случаи”";
+  if (d==="data") return "Экстракция данных: риск “точность/проверки/выборки”";
+  if (d==="design") return "Дизайн: риск “состояния/edge-cases/согласования”";
+  if (d==="arch") return "Архитектура: риск “скрытые зависимости”";
+  return "Подразделение ещё не назначено.";
 }
 
 function setGlitch(on){
   if (!on) return;
   el.glitch.classList.remove("on");
-  // force reflow
   void el.glitch.offsetWidth;
   el.glitch.classList.add("on");
 }
 
-function pushLog(choiceLabel){
-  const node = story.nodes[currentId];
-  const div = document.createElement("div");
-  div.className = "log-item";
-  div.innerHTML = `<div><b>${node?.title ?? currentId}</b></div><div class="t">→ ${escapeHtml(choiceLabel)}</div>`;
-  el.log.prepend(div);
+function stopTyping(){
+  if (typing.timer) clearInterval(typing.timer);
+  typing.running = false;
+  typing.timer = null;
 }
 
-function escapeHtml(s){
-  return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+function typeText(full){
+  stopTyping();
+  typing.fullText = full;
+  typing.idx = 0;
+  el.nodeText.textContent = "";
+
+  if (!el.typeToggle.checked){
+    el.nodeText.textContent = full;
+    return;
+  }
+  typing.running = true;
+  typing.timer = setInterval(() => {
+    typing.idx += 2;
+    el.nodeText.textContent = typing.fullText.slice(0, typing.idx);
+    if (typing.idx >= typing.fullText.length){
+      stopTyping();
+    }
+  }, 12);
+}
+
+function meetsReq(req){
+  if (!req) return true;
+  if (req.dayMin != null && state.day < req.dayMin) return false;
+  if (req.budgetMin != null && state.budget < req.budgetMin) return false;
+  if (req.stressMax != null && state.stress > req.stressMax) return false;
+  if (req.focusMin != null && state.focus < req.focusMin) return false;
+  if (req.scopeMax != null && state.scope > req.scopeMax) return false;
+  if (req.repMin != null && state.rep < req.repMin) return false;
+  if (req.roleIs && state.role !== req.roleIs) return false;
+  if (req.deptIs && state.flags.routedToDevDept !== req.deptIs) return false;
+  return true;
 }
 
 function maybeWhisper(){
@@ -1414,13 +1459,15 @@ function maybeRandomEvent(){
 
   const events = story.meta.randomEvents || [];
   for (const e of events){
-    // creep makes events slightly more likely
     const c = creepScore();
     const bonus = c >= 55 ? 0.06 : c >= 28 ? 0.03 : 0;
-    const p = (e.chance || 0) + bonus;
+    // dept adds tiny chaos
+    const dept = state.flags.routedToDevDept;
+    const deptBonus = (dept==="data" || dept==="arch") ? 0.02 : 0;
+    const p = (e.chance || 0) + bonus + deptBonus;
     if (Math.random() < p){
       applyDelta(e.delta);
-      if (e.glitch) setGlitch(true);
+      if (c >= 55) setGlitch(true);
       return e;
     }
   }
@@ -1440,33 +1487,125 @@ function renderProgress(){
   }
 }
 
-function stopTyping(){
-  if (typing.timer) clearInterval(typing.timer);
-  typing.running = false;
-  typing.timer = null;
-}
+function updateTopPills(){
+  el.stRole.textContent = state.role;
+  el.stDay.textContent = state.day;
+  el.stBudget.textContent = state.budget;
+  el.stStress.textContent = state.stress;
+  el.stScope.textContent = state.scope;
+  el.stFocus.textContent = state.focus;
 
-function typeText(full){
-  stopTyping();
-  typing.fullText = full;
-  typing.idx = 0;
-  el.nodeText.textContent = "";
-
-  if (!el.typeToggle.checked){
-    el.nodeText.textContent = full;
-    return;
+  const pillDots = [
+    [el.pillRole, state.role === "—" ? "warn" : "ok"],
+    [el.pillDay, "ok"],
+    [el.pillBudget, state.budget >= 40 ? "ok" : state.budget >= 15 ? "warn" : "bad"],
+    [el.pillStress, state.stress <= 6 ? "ok" : state.stress <= 12 ? "warn" : "bad"],
+    [el.pillScope, state.scope <= 3 ? "ok" : state.scope <= 6 ? "warn" : "bad"],
+  ];
+  for (const [pill, lvl] of pillDots){
+    const d = pill.querySelector(".dot");
+    d.className = "dot " + (lvl==="ok" ? "ok" : lvl==="warn" ? "warn" : "bad");
   }
 
-  typing.running = true;
-  typing.timer = setInterval(() => {
-    typing.idx += 2; // speed
-    el.nodeText.textContent = typing.fullText.slice(0, typing.idx);
-    if (typing.idx >= typing.fullText.length){
-      stopTyping();
-    }
-  }, 12);
+  const c = creepScore();
+  el.creepBar.style.width = c + "%";
+  if (c < 28){ el.creepLabel.textContent = "спокоен"; el.creepHint.textContent = "Пока границы держатся."; }
+  else if (c < 55){ el.creepLabel.textContent = "шевелится"; el.creepHint.textContent = "Скоуп ищет лазейки."; }
+  else { el.creepLabel.textContent = "проснулся"; el.creepHint.textContent = "Немедленные задачи и возвраты учащаются."; }
+
+  el.riskVal.textContent = labelRisk()[0];
+  el.repVal.textContent = labelRep();
+  el.deptHint.textContent = deptHuman();
 }
 
+/** -------- Save / Load -------- */
+function saveGame(){
+  const payload = {
+    v: 1,
+    state,
+    currentId,
+    history,
+    logHtml: el.log.innerHTML,
+    settings: {
+      audio: el.audioToggle.checked,
+      type: el.typeToggle.checked
+    }
+  };
+  localStorage.setItem(SAVE_KEY, JSON.stringify(payload));
+}
+function hasSave(){
+  try{
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return false;
+    const obj = JSON.parse(raw);
+    return !!obj && obj.v === 1;
+  } catch { return false; }
+}
+function loadGame(){
+  const raw = localStorage.getItem(SAVE_KEY);
+  if (!raw) return false;
+  try{
+    const obj = JSON.parse(raw);
+    if (!obj || obj.v !== 1) return false;
+    state = obj.state;
+    currentId = obj.currentId;
+    history = obj.history || [];
+    el.log.innerHTML = obj.logHtml || "";
+    if (obj.settings){
+      el.audioToggle.checked = !!obj.settings.audio;
+      el.typeToggle.checked = !!obj.settings.type;
+      el.audioToggle2.checked = !!obj.settings.audio;
+      el.typeToggle2.checked = !!obj.settings.type;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+function resetSave(){
+  localStorage.removeItem(SAVE_KEY);
+}
+
+/** -------- Log -------- */
+function pushLog(choiceLabel){
+  const node = story.nodes[currentId];
+  const div = document.createElement("div");
+  div.className = "log-item";
+  div.innerHTML = `<div><b>${escapeHtml(node?.title ?? currentId)}</b></div><div class="t">→ ${escapeHtml(choiceLabel)}</div>`;
+  el.log.prepend(div);
+}
+
+/** -------- Quiz engine -------- */
+function quizInit(node){
+  state.quiz.active = true;
+  state.quiz.q = 0;
+  state.quiz.score = 0;
+  state.quiz.total = node.quiz.total || (node.quiz.questions?.length || 0);
+  state.quiz.onPassNext = node.quiz.onPassNext || "";
+  state.quiz.onFailNext = node.quiz.onFailNext || "";
+}
+function quizPick(qIndex, optIndex, node){
+  const q = node.quiz.questions[qIndex];
+  const opt = q.options[optIndex];
+  state.quiz.score += num(opt.score);
+  state.quiz.q = qIndex + 1;
+}
+function quizNextNode(){
+  if (!state.quiz.active) return null;
+  if (state.quiz.q >= state.quiz.total){
+    // pass threshold: score >= 2 (out of 3)
+    const passed = state.quiz.score >= 2;
+    const next = passed ? state.quiz.onPassNext : state.quiz.onFailNext;
+    state.quiz.active = false;
+    return next;
+  }
+  // map q index to node id
+  if (state.quiz.q === 1) return "techcom_quiz_q2";
+  if (state.quiz.q === 2) return "techcom_quiz_q3";
+  return null;
+}
+
+/** -------- Render -------- */
 function renderNode(){
   const node = story.nodes[currentId];
   if (!node){
@@ -1482,10 +1621,18 @@ function renderNode(){
   el.title.textContent = story.meta.title || "Игра";
   el.sub.textContent = story.meta.subtitle || "";
   el.nodeTitle.textContent = node.title || "";
-  el.nodeBadge.textContent = "Глава " + (node.chapter ?? "");
-  el.nodeMeta.textContent = `id: ${currentId} · флаги: ${Object.entries(state.flags).filter(([k,v])=>v).map(([k])=>k).slice(0,4).join(", ") || "—"}`;
+  el.nodeBadge.textContent = node.chapter != null ? ("Глава " + node.chapter) : "—";
 
-  // render text with typewriter
+  const flagsOn = Object.entries(state.flags).filter(([k,v])=>v).map(([k])=>k).slice(0,6).join(", ") || "—";
+  const dept = state.flags.routedToDevDept || "—";
+  el.nodeMeta.textContent = `id: ${currentId} · роль: ${state.role} · dept: ${dept} · флаги: ${flagsOn}`;
+
+  // quiz special init (first quiz node)
+  if (node.quiz && !state.quiz.active){
+    quizInit(node);
+  }
+
+  // render text
   typeText(node.text || "");
 
   // choices
@@ -1494,7 +1641,7 @@ function renderNode(){
     const b = document.createElement("button");
     b.className = "choice";
     b.innerHTML = `Сыграть ещё раз<div class="choice-meta"><span class="tag ok">restart</span></div>`;
-    b.addEventListener("click", restart);
+    b.addEventListener("click", newMission);
     el.choices.appendChild(b);
   } else {
     const visibleChoices = (node.choices || []).filter(ch => meetsReq(ch.req));
@@ -1511,7 +1658,9 @@ function renderNode(){
         if (ch.delta.rep > 0) tags.push(`<span class="tag ok">+репутация</span>`);
         if (ch.delta.focus < 0) tags.push(`<span class="tag warn">-фокус</span>`);
       }
-      if (ch.req?.flags?.length) tags.push(`<span class="tag">условие</span>`);
+      if (ch.req?.repMin != null || ch.req?.focusMin != null || ch.req?.roleIs || ch.req?.deptIs) tags.push(`<span class="tag">условие</span>`);
+      if (ch.setDept) tags.push(`<span class="tag">dept</span>`);
+      if (ch.quizPick) tags.push(`<span class="tag">ответ</span>`);
 
       b.innerHTML = `${escapeHtml(ch.label)}<div class="choice-meta">${tags.join(" ")}</div>`;
       b.addEventListener("click", () => choose(ch));
@@ -1519,74 +1668,101 @@ function renderNode(){
     }
   }
 
-  // side effects
   updateTopPills();
   renderProgress();
   maybeWhisper();
 
   el.back.disabled = history.length === 0;
+  saveGame();
 }
 
 function choose(choice){
-  // snapshot for back
-  history.push({
-    prevId: currentId,
-    prevState: structuredClone(state),
-  });
+  history.push({ prevId: currentId, prevState: structuredClone(state), prevLog: el.log.innerHTML });
 
   Audio.click();
-
-  // advance counters
   state.steps = clamp(state.steps + 1, 0, story.meta.maxSteps);
 
-  // apply choice effects
+  // apply
   applyDelta(choice.delta);
   setFlags(choice.setFlags);
+  if (choice.setRole) setRole(choice.setRole);
+  if (choice.setDept) setDept(choice.setDept);
 
-  // some choices “wake creep”
-  if (choice.setFlags?.creepAwake) state.flags.creepAwake = true;
+  // quiz pick handling
+  const node = story.nodes[currentId];
+  if (choice.quizPick && node?.quiz){
+    quizPick(choice.quizPick.qIndex, choice.quizPick.optIndex, node);
+  }
 
   // move
-  currentId = choice.next;
+  let nextId = choice.next;
 
-  // random event after move
+  // special: service quiz nodes
+  if (nextId === "techcom_quiz_answer"){
+    // after answer: move to next question or finish
+    const nextQuiz = quizNextNode();
+    if (nextQuiz){
+      // show brief feedback in whisper
+      el.whisper.textContent = `Техком фиксирует ответ. Счёт: ${state.quiz.score}/${state.quiz.total}`;
+      el.whisper.hidden = false;
+      nextId = nextQuiz;
+    } else {
+      // should not happen, but fallback
+      nextId = "techcom_fail";
+    }
+  }
+  if (nextId === "techcom_quiz_next"){
+    // unused fallback
+    nextId = quizNextNode() || "techcom_fail";
+  }
+
+  // random event after move (only if not ending)
+  currentId = nextId;
   const ev = maybeRandomEvent();
   if (ev){
-    // show event as whisper-like system note
     el.whisper.textContent = "Событие: " + ev.text;
     el.whisper.hidden = false;
-    if (ev.glitch) Audio.bad();
+    if (creepScore() >= 55) { setGlitch(true); Audio.bad(); }
     else Audio.good();
   }
 
-  // auto-glitch when creep is high
   if (creepScore() >= 60) setGlitch(true);
-
-  // render + log
   pushLog(choice.label);
+
   renderNode();
 }
 
-function restart(){
+function newMission(){
   stopTyping();
   state = structuredClone(story.initialState);
-  currentId = "start";
+  currentId = "prologue";
   history = [];
   el.log.innerHTML = "";
   renderNode();
 }
-
+function continueMission(){
+  stopTyping();
+  if (!loadGame()){
+    // no save, start new
+    newMission();
+    return;
+  }
+  renderNode();
+}
 function back(){
   stopTyping();
   if (!history.length) return;
   const last = history.pop();
   currentId = last.prevId;
   state = last.prevState;
+  el.log.innerHTML = last.prevLog || el.log.innerHTML;
   Audio.click();
   renderNode();
 }
 
-el.restart.addEventListener("click", restart);
+/** UI actions */
+el.restart.addEventListener("click", () => { el.overlay.style.display = "flex"; });
+el.continueBtn.addEventListener("click", () => { el.overlay.style.display = "flex"; });
 el.back.addEventListener("click", back);
 el.skip.addEventListener("click", () => {
   if (!typing.running) return;
@@ -1594,12 +1770,56 @@ el.skip.addEventListener("click", () => {
   el.nodeText.textContent = typing.fullText;
 });
 
-document.addEventListener("click", () => {
-  // warm up audio context on first interaction
-  if (el.audioToggle.checked) Audio.click();
-}, { once:true });
+// sync toggles between overlay and panel
+function syncToggles(fromOverlay=false){
+  if (fromOverlay){
+    el.audioToggle.checked = el.audioToggle2.checked;
+    el.typeToggle.checked = el.typeToggle2.checked;
+  } else {
+    el.audioToggle2.checked = el.audioToggle.checked;
+    el.typeToggle2.checked = el.typeToggle.checked;
+  }
+  saveGame();
+}
+el.audioToggle.addEventListener("change", ()=>syncToggles(false));
+el.typeToggle.addEventListener("change", ()=>syncToggles(false));
+el.audioToggle2.addEventListener("change", ()=>syncToggles(true));
+el.typeToggle2.addEventListener("change", ()=>syncToggles(true));
 
-renderNode();
+el.btnNew.addEventListener("click", () => {
+  syncToggles(true);
+  el.overlay.style.display = "none";
+  newMission();
+});
+el.btnContinue.addEventListener("click", () => {
+  syncToggles(true);
+  el.overlay.style.display = "none";
+  continueMission();
+});
+el.btnResetSave.addEventListener("click", () => {
+  resetSave();
+  el.btnContinue.textContent = "Продолжить (нет сохранения)";
+  Audio.bad();
+});
+
+// warm up audio context
+document.addEventListener("click", () => { if (el.audioToggle.checked) Audio.click(); }, { once:true });
+
+/** boot */
+(function boot(){
+  // enable/disable continue button based on save
+  const ok = hasSave();
+  el.btnContinue.disabled = !ok;
+  el.btnContinue.textContent = ok ? "Продолжить миссию" : "Продолжить (нет сохранения)";
+  // also keep panel continue button meaningful
+  el.continueBtn.disabled = !ok;
+
+  // start with overlay; don't render main until user picks
+  // but show a snapshot if save exists (optional)
+  // We'll render a blank prologue so UI isn't empty if overlay closed somehow
+  currentId = "prologue";
+  renderNode();
+})();
 </script>
 </body>
 </html>
