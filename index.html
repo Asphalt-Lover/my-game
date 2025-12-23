@@ -3,1603 +3,1791 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Кошмар проекта — интерактивная история</title>
+  <title>CBONDS: Полёт к Центру Галактики</title>
+  <meta name="theme-color" content="#0b0f1a" />
   <style>
     :root{
-      --bg0:#07070a; --bg1:#0b0d12; --ink:#e9eef7; --muted:rgba(233,238,247,.68);
-      --glass: rgba(255,255,255,.06);
-      --stroke: rgba(255,255,255,.14);
-      --stroke2: rgba(255,255,255,.22);
-      --danger: rgba(255,120,120,.95);
-      --ok: rgba(120,255,190,.95);
-      --warn: rgba(255,205,120,.95);
+      --bg:#0b0f1a;
+      --panel:rgba(14, 22, 44, .65);
+      --panel2:rgba(10, 16, 34, .55);
+      --line:rgba(130, 170, 255, .18);
+      --text:#dfe9ff;
+      --muted:rgba(223,233,255,.72);
+      --cyan:#7cf7ff;
+      --violet:#b8a7ff;
+      --amber:#ffd08a;
+      --danger:#ff6b7a;
+      --ok:#86ffb0;
+      --shadow: 0 18px 60px rgba(0,0,0,.55);
       --radius: 18px;
-      --shadow: 0 20px 60px rgba(0,0,0,.45);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
     }
 
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
+    *{box-sizing:border-box}
+    html,body{height:100%}
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-      background: radial-gradient(1200px 800px at 20% 10%, #14183b 0%, transparent 55%),
-                  radial-gradient(900px 700px at 70% 30%, #2a1440 0%, transparent 60%),
-                  radial-gradient(800px 600px at 30% 80%, #0c3b2a 0%, transparent 55%),
-                  linear-gradient(180deg, var(--bg0), var(--bg1));
-      color: var(--ink);
+      font-family:var(--sans);
+      color:var(--text);
+      background: radial-gradient(1200px 700px at 70% -10%, rgba(124,247,255,.14), transparent 55%),
+                  radial-gradient(900px 600px at 10% 10%, rgba(184,167,255,.14), transparent 55%),
+                  radial-gradient(900px 600px at 70% 90%, rgba(255,208,138,.10), transparent 55%),
+                  linear-gradient(180deg, #070a12, var(--bg));
       overflow-x:hidden;
     }
 
-    /* Animated “fog” / gradient drift */
-    .bg-drift{
-      position:fixed; inset:-30%;
-      background:
-        radial-gradient(900px 600px at 20% 35%, rgba(138,115,255,.20), transparent 58%),
-        radial-gradient(850px 700px at 75% 30%, rgba(255,120,200,.12), transparent 60%),
-        radial-gradient(800px 620px at 45% 80%, rgba(110,255,210,.10), transparent 55%);
-      filter: blur(18px) saturate(1.12);
-      animation: drift 18s ease-in-out infinite alternate;
-      opacity:.9;
+    /* starfield */
+    .starfield, .starfield:before, .starfield:after{
+      position:fixed; inset:0;
+      background-repeat:repeat;
       pointer-events:none;
+      content:"";
+      z-index:-2;
+      opacity:.65;
+    }
+    .starfield{
+      background-image:
+        radial-gradient(1px 1px at 10px 20px, rgba(255,255,255,.55), transparent 60%),
+        radial-gradient(1px 1px at 50px 80px, rgba(255,255,255,.45), transparent 60%),
+        radial-gradient(1px 1px at 90px 140px, rgba(255,255,255,.35), transparent 60%),
+        radial-gradient(1px 1px at 140px 30px, rgba(255,255,255,.40), transparent 60%),
+        radial-gradient(1px 1px at 200px 110px, rgba(255,255,255,.35), transparent 60%);
+      background-size: 220px 160px;
+      filter: drop-shadow(0 0 8px rgba(124,247,255,.08));
+    }
+    .starfield:before{
+      background-image:
+        radial-gradient(1px 1px at 30px 60px, rgba(255,255,255,.35), transparent 60%),
+        radial-gradient(1px 1px at 120px 90px, rgba(255,255,255,.30), transparent 60%),
+        radial-gradient(1px 1px at 180px 20px, rgba(255,255,255,.25), transparent 60%);
+      background-size: 260px 190px;
+      animation: drift 18s linear infinite;
+      opacity:.55;
+      z-index:-3;
+    }
+    .starfield:after{
+      background-image:
+        radial-gradient(1px 1px at 40px 120px, rgba(255,255,255,.28), transparent 60%),
+        radial-gradient(1px 1px at 160px 60px, rgba(255,255,255,.24), transparent 60%),
+        radial-gradient(1px 1px at 210px 140px, rgba(255,255,255,.20), transparent 60%);
+      background-size: 300px 220px;
+      animation: drift 28s linear infinite reverse;
+      opacity:.45;
+      z-index:-4;
     }
     @keyframes drift{
-      0%{ transform: translate3d(-2%, -1%, 0) scale(1.02) rotate(-.5deg); }
-      100%{ transform: translate3d(2%, 1.5%, 0) scale(1.06) rotate(.6deg); }
+      from{ transform: translate3d(0,0,0) }
+      to{ transform: translate3d(-120px, 80px, 0) }
     }
 
-    /* Film grain */
-    .grain{
+    /* subtle scanlines */
+    .scanlines{
       position:fixed; inset:0;
-      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(255,255,255,.03),
+        rgba(255,255,255,.03) 1px,
+        transparent 2px,
+        transparent 5px
+      );
       mix-blend-mode: overlay;
-      opacity:.18;
+      opacity:.22;
       pointer-events:none;
+      z-index:-1;
     }
 
-    /* Layout */
-    .wrap{ max-width: 1100px; margin: 0 auto; padding: 22px 16px 44px; position:relative; }
+    .wrap{
+      max-width:1050px;
+      margin: 24px auto 56px;
+      padding: 0 16px;
+    }
+
     header{
-      display:flex; gap:14px; align-items:center; justify-content:space-between; flex-wrap:wrap;
-      position:sticky; top:0; z-index:4;
-      padding: 12px 10px;
-      backdrop-filter: blur(12px);
-      background: linear-gradient(180deg, rgba(8,9,14,.78), rgba(8,9,14,.38));
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: var(--radius);
-      box-shadow: 0 10px 40px rgba(0,0,0,.28);
+      display:flex;
+      gap:14px;
+      align-items:flex-start;
+      justify-content:space-between;
+      margin-bottom:18px;
     }
-    .brand{
-      display:flex; align-items:center; gap:10px;
-      min-width: 240px;
-    }
-    .logo{
-      width:34px; height:34px; border-radius: 12px;
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.28), rgba(255,255,255,.06)),
-                  linear-gradient(135deg, rgba(170,120,255,.55), rgba(120,255,210,.25));
-      border:1px solid rgba(255,255,255,.14);
-      box-shadow: 0 12px 26px rgba(0,0,0,.28);
-      position:relative; overflow:hidden;
-    }
-    .logo:after{
-      content:"";
-      position:absolute; inset:-30%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.25), transparent);
-      transform: rotate(25deg);
-      animation: shine 3.6s ease-in-out infinite;
-      opacity:.7;
-    }
-    @keyframes shine{
-      0%{ transform: translateX(-35%) rotate(25deg); opacity:.0; }
-      25%{ opacity:.7; }
-      55%{ opacity:.6; }
-      100%{ transform: translateX(35%) rotate(25deg); opacity:.0; }
-    }
-    h1{ margin:0; font-size: 14px; letter-spacing:.2px; font-weight:800; }
-    .subtitle{ font-size: 12px; color: var(--muted); margin-top:2px; }
 
-    .top-right{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
-    .pill{
-      border: 1px solid var(--stroke);
-      background: rgba(255,255,255,.04);
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      color: rgba(233,238,247,.86);
-      display:flex; gap:8px; align-items:center;
-      white-space:nowrap;
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
     }
-    .dot{ width:8px; height:8px; border-radius:999px; background: rgba(255,255,255,.25); }
-    .dot.ok{ background: rgba(120,255,190,.85); }
-    .dot.warn{ background: rgba(255,205,120,.85); }
-    .dot.bad{ background: rgba(255,120,120,.85); }
+    .title{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .sigil{
+      width:38px; height:38px;
+      border-radius:12px;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(124,247,255,.85), rgba(124,247,255,.15) 45%, transparent 70%),
+        radial-gradient(circle at 70% 70%, rgba(184,167,255,.65), transparent 60%),
+        linear-gradient(135deg, rgba(124,247,255,.22), rgba(184,167,255,.22));
+      border:1px solid rgba(124,247,255,.25);
+      box-shadow: 0 0 40px rgba(124,247,255,.10);
+      position:relative;
+      overflow:hidden;
+    }
+    .sigil:after{
+      content:"";
+      position:absolute; inset:-40%;
+      background: conic-gradient(from 0deg, transparent, rgba(255,255,255,.10), transparent 30%, rgba(124,247,255,.10), transparent 60%);
+      animation: spin 10s linear infinite;
+      opacity:.8;
+    }
+    @keyframes spin{ to{ transform:rotate(360deg) } }
+
+    h1{
+      margin:0;
+      font-size: 18px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-family: var(--mono);
+      color: rgba(223,233,255,.95);
+    }
+    .subtitle{
+      margin:0;
+      font-size: 13px;
+      color: var(--muted);
+      max-width: 760px;
+      line-height:1.4;
+    }
+
+    .topActions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .btn{
+      appearance:none;
+      border:1px solid rgba(124,247,255,.18);
+      background: linear-gradient(180deg, rgba(124,247,255,.10), rgba(124,247,255,.02));
+      color: var(--text);
+      border-radius: 14px;
+      padding: 10px 12px;
+      cursor:pointer;
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing:.04em;
+      box-shadow: 0 12px 40px rgba(0,0,0,.35);
+      transition: transform .08s ease, border-color .18s ease, box-shadow .18s ease;
+      user-select:none;
+    }
+    .btn:hover{ transform: translateY(-1px); border-color: rgba(124,247,255,.33); }
+    .btn:active{ transform: translateY(0); }
+    .btn.secondary{
+      border-color: rgba(184,167,255,.18);
+      background: linear-gradient(180deg, rgba(184,167,255,.10), rgba(184,167,255,.02));
+    }
+    .btn.danger{
+      border-color: rgba(255,107,122,.25);
+      background: linear-gradient(180deg, rgba(255,107,122,.12), rgba(255,107,122,.02));
+    }
 
     .grid{
       display:grid;
-      grid-template-columns: 1.25fr .75fr;
-      gap: 14px;
-      margin-top: 14px;
+      grid-template-columns: 1.05fr .95fr;
+      gap:14px;
+      align-items:start;
     }
-    @media (max-width: 980px){
+    @media (max-width: 920px){
       .grid{ grid-template-columns: 1fr; }
+      .topActions{ justify-content:flex-start; }
     }
 
-    /* Cards */
     .card{
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
       border-radius: var(--radius);
+      background: linear-gradient(180deg, var(--panel), rgba(10,16,34,.40));
+      border: 1px solid rgba(130,170,255,.14);
       box-shadow: var(--shadow);
-      overflow:hidden;
       position:relative;
+      overflow:hidden;
     }
-    .card-inner{ padding: 16px 16px 14px; }
+    .card:before{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        radial-gradient(600px 220px at 20% 0%, rgba(124,247,255,.14), transparent 60%),
+        radial-gradient(420px 180px at 85% 20%, rgba(184,167,255,.12), transparent 60%),
+        radial-gradient(420px 200px at 60% 105%, rgba(255,208,138,.08), transparent 60%);
+      opacity:.85;
+      pointer-events:none;
+    }
 
-    /* Left main card */
-    .scene-head{
-      display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
-      margin-bottom: 8px;
+    .cardInner{ position:relative; padding: 14px 14px 14px; }
+
+    .hud{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
     }
-    .scene-title{
-      margin:0;
-      font-size: 16px;
-      font-weight: 900;
-      letter-spacing:.2px;
+
+    .hudRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
     }
-    .badge{
-      font-size: 11px;
-      padding: 6px 10px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.04);
-      color: rgba(233,238,247,.8);
+    .hudLabel{
+      font-family: var(--mono);
+      font-size: 12px;
+      color: rgba(223,233,255,.85);
+      letter-spacing:.04em;
+      display:flex;
+      align-items:center;
+      gap:8px;
       white-space:nowrap;
     }
-    .scene-text{
-      margin: 0;
-      line-height: 1.62;
-      color: rgba(233,238,247,.93);
-      white-space: pre-wrap;
-      min-height: 120px;
-    }
-
-    .whisper{
-      margin-top: 12px;
-      padding: 12px 12px;
-      border-radius: 14px;
-      border: 1px dashed rgba(255,255,255,.18);
-      background: rgba(0,0,0,.14);
-      color: rgba(233,238,247,.70);
-      font-style: italic;
-      font-size: 13px;
-    }
-
-    .choices{ display:grid; gap:10px; margin-top: 14px; }
-    button.choice{
-      cursor:pointer;
-      text-align:left;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      color: rgba(233,238,247,.96);
-      padding: 12px 12px;
-      font-size: 14px;
-      transition: transform .05s ease, border-color .12s ease, background .12s ease, filter .12s ease;
-      position:relative;
-      overflow:hidden;
-    }
-    button.choice:hover{
-      border-color: rgba(255,255,255,.26);
-      background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.04));
-      filter: brightness(1.03);
-    }
-    button.choice:active{ transform: translateY(1px); }
-
-    .choice-meta{
-      margin-top: 6px;
-      font-size: 12px;
-      color: rgba(233,238,247,.62);
-      display:flex; gap:8px; flex-wrap:wrap;
-    }
-    .tag{
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(0,0,0,.10);
-      padding: 2px 8px;
+    .badge{
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 4px 8px;
       border-radius: 999px;
+      border:1px solid rgba(130,170,255,.16);
+      background: rgba(10,16,34,.40);
+      color: rgba(223,233,255,.9);
     }
-    .tag.bad{ border-color: rgba(255,120,120,.30); color: rgba(255,160,160,.92); }
-    .tag.warn{ border-color: rgba(255,205,120,.30); color: rgba(255,205,120,.92); }
-    .tag.ok{ border-color: rgba(120,255,190,.30); color: rgba(140,255,210,.92); }
 
-    /* Controls row */
-    .row{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 14px; }
-    .ghost{
-      cursor:pointer;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.18);
-      background: transparent;
-      color: rgba(233,238,247,.86);
-      padding: 10px 12px;
-      font-size: 13px;
-    }
-    .ghost:hover{ border-color: rgba(255,255,255,.30); background: rgba(255,255,255,.03); }
-    .ghost:disabled{ opacity:.45; cursor:not-allowed; }
-
-    /* Right panel */
-    .panel-title{
-      display:flex; justify-content:space-between; align-items:center; gap:10px;
-      margin:0 0 10px;
-    }
-    .panel-title h2{ margin:0; font-size: 13px; font-weight: 900; letter-spacing:.25px; color: rgba(233,238,247,.86); }
-    .tiny{ font-size: 12px; color: rgba(233,238,247,.62); }
-
-    .meter{
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.12);
-      border-radius: 16px;
-      padding: 10px 10px;
-      margin-bottom: 12px;
-    }
-    .meter-top{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
     .bar{
       height: 10px;
       border-radius:999px;
-      background: rgba(255,255,255,.08);
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(130,170,255,.14);
       overflow:hidden;
-      margin-top: 10px;
-      border:1px solid rgba(255,255,255,.10);
+      flex:1;
+      position:relative;
     }
-    .bar > div{
-      height: 100%;
+    .bar > i{
+      display:block;
+      height:100%;
       width: 0%;
-      background: linear-gradient(90deg, rgba(120,255,190,.85), rgba(255,205,120,.85), rgba(255,120,120,.85));
+      border-radius:999px;
+      background: linear-gradient(90deg, rgba(124,247,255,.75), rgba(184,167,255,.75));
+      box-shadow: 0 0 18px rgba(124,247,255,.20);
       transition: width .35s ease;
     }
-
-    .kv{
-      display:grid; grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 12px;
+    .bar.danger > i{
+      background: linear-gradient(90deg, rgba(255,208,138,.70), rgba(255,107,122,.75));
+      box-shadow: 0 0 18px rgba(255,107,122,.18);
     }
-    .k{
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.03);
+
+    .galaxy{
+      margin-top:12px;
       border-radius: 16px;
-      padding: 10px 10px;
-      min-height: 52px;
+      border:1px solid rgba(130,170,255,.14);
+      background: linear-gradient(180deg, rgba(7,10,18,.45), rgba(7,10,18,.15));
+      overflow:hidden;
+      position:relative;
+      padding: 12px;
     }
-    .k .lbl{ font-size: 11px; color: rgba(233,238,247,.62); }
-    .k .val{ font-size: 14px; font-weight: 900; margin-top: 2px; }
-
-    details{
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.03);
-      border-radius: 16px;
-      padding: 10px 10px;
-      margin-top: 12px;
-    }
-    summary{
-      cursor:pointer;
-      font-weight: 800;
-      font-size: 12px;
-      color: rgba(233,238,247,.86);
-      list-style:none;
-    }
-    summary::-webkit-details-marker{ display:none; }
-    .log{
-      margin-top:10px;
-      display:grid; gap:8px;
-      max-height: 240px;
-      overflow:auto;
-      padding-right:6px;
-    }
-    .log-item{
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.10);
-      border-radius: 14px;
-      padding: 10px 10px;
-      font-size: 12px;
-      color: rgba(233,238,247,.82);
-    }
-    .log-item .t{ color: rgba(233,238,247,.62); font-size: 11px; margin-top: 4px; }
-
-    .map{
-      margin-top: 12px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.03);
-      border-radius: 16px;
-      padding: 10px 10px;
-    }
-    .dots{ display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
-    .p{
-      width:10px; height:10px; border-radius:999px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-    }
-    .p.on{ background: rgba(120,255,190,.35); border-color: rgba(120,255,190,.45); }
-    .p.bad{ background: rgba(255,120,120,.25); border-color: rgba(255,120,120,.45); }
-
-    /* Scene art banner (simple SVG) */
-    .art{
-      height: 120px;
-      border-bottom: 1px solid rgba(255,255,255,.10);
+    .galaxyCanvas{
+      width:100%;
+      aspect-ratio: 16/8;
+      border-radius: 12px;
       background:
-        radial-gradient(700px 220px at 30% 30%, rgba(255,255,255,.10), transparent 65%),
-        linear-gradient(135deg, rgba(170,120,255,.22), rgba(120,255,210,.10));
+        radial-gradient(120px 120px at 16% 55%, rgba(124,247,255,.18), transparent 60%),
+        radial-gradient(200px 200px at 70% 55%, rgba(184,167,255,.12), transparent 60%),
+        radial-gradient(120px 120px at 88% 40%, rgba(255,208,138,.10), transparent 60%),
+        radial-gradient(8px 8px at 30% 40%, rgba(255,255,255,.6), transparent 65%),
+        radial-gradient(6px 6px at 55% 65%, rgba(255,255,255,.5), transparent 65%),
+        radial-gradient(6px 6px at 75% 35%, rgba(255,255,255,.45), transparent 65%),
+        linear-gradient(135deg, rgba(124,247,255,.05), rgba(184,167,255,.06));
       position:relative;
       overflow:hidden;
     }
-    .art svg{ position:absolute; inset:0; width:100%; height:100%; opacity:.85; }
-    .art .glow{
-      position:absolute; inset:-40%;
-      background: radial-gradient(circle at 30% 35%, rgba(255,255,255,.12), transparent 55%);
-      filter: blur(20px);
-      animation: drift2 14s ease-in-out infinite alternate;
+    .routeLine{
+      position:absolute; inset:0;
+      background: linear-gradient(90deg, transparent 0 10%, rgba(124,247,255,.08) 10% 11%, transparent 11% 20%,
+                                          rgba(184,167,255,.08) 20% 21%, transparent 21% 30%,
+                                          rgba(255,208,138,.06) 30% 31%, transparent 31% 40%,
+                                          rgba(124,247,255,.06) 40% 41%, transparent 41% 100%);
+      mix-blend-mode:screen;
+      opacity:.55;
+      filter: blur(0.4px);
     }
-    @keyframes drift2{ from{ transform: translate(-1%, 1%) scale(1.02); } to{ transform: translate(2%, -1%) scale(1.06); } }
+    .ship{
+      position:absolute;
+      top: 52%;
+      transform: translate(-50%, -50%);
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.95), rgba(124,247,255,.55) 45%, rgba(124,247,255,.12) 68%, transparent 72%);
+      box-shadow: 0 0 24px rgba(124,247,255,.28);
+      border:1px solid rgba(124,247,255,.30);
+    }
+    .ship:after{
+      content:"";
+      position:absolute;
+      left:-30px;
+      top:50%;
+      width: 28px;
+      height: 2px;
+      transform: translateY(-50%);
+      background: linear-gradient(90deg, transparent, rgba(124,247,255,.40), rgba(184,167,255,.20), transparent);
+      opacity:.9;
+    }
+    .center{
+      position:absolute;
+      left: 92%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.9), rgba(255,208,138,.55) 40%, rgba(255,107,122,.20) 70%, transparent 76%);
+      box-shadow: 0 0 34px rgba(255,208,138,.20);
+      border:1px solid rgba(255,208,138,.22);
+    }
+    .legend{
+      display:flex;
+      justify-content:space-between;
+      margin-top:8px;
+      color: rgba(223,233,255,.68);
+      font-family: var(--mono);
+      font-size:11px;
+      letter-spacing:.04em;
+    }
 
-    /* Glitch overlay (triggered) */
-    .glitch{
-      position:fixed; inset:0;
-      pointer-events:none;
-      opacity:0;
-      background:
-        linear-gradient(90deg, rgba(255,60,160,.12), transparent 24%, rgba(80,255,210,.10) 55%, transparent 75%),
-        repeating-linear-gradient(0deg, rgba(255,255,255,.06) 0 1px, transparent 1px 3px);
-      mix-blend-mode: screen;
-      transform: translateZ(0);
+    .sectionTitle{
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color: rgba(223,233,255,.86);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin:0 0 8px;
     }
-    .glitch.on{
-      animation: glitch 420ms linear 1;
-    }
-    @keyframes glitch{
-      0%{ opacity:0; transform: translate(0,0); }
-      15%{ opacity:.55; transform: translate(8px,-6px) skewX(2deg); }
-      35%{ opacity:.35; transform: translate(-10px,4px) skewX(-2deg); }
-      55%{ opacity:.45; transform: translate(6px,8px) skewY(1deg); }
-      100%{ opacity:0; transform: translate(0,0); }
+    .sectionTitle small{
+      color: rgba(223,233,255,.60);
+      font-weight:400;
+      text-transform:none;
+      letter-spacing:0;
+      font-family:var(--sans);
+      font-size:12px;
     }
 
-    a{ color:#9ad0ff; }
-    code{ color: rgba(233,238,247,.85); }
+    .sceneMeta{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+
+    .pill{
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border:1px solid rgba(130,170,255,.14);
+      background: rgba(10,16,34,.45);
+      color: rgba(223,233,255,.85);
+    }
+    .pill.cycle{ border-color: rgba(184,167,255,.18); }
+    .pill.node{ border-color: rgba(124,247,255,.18); }
+    .pill.risk{ border-color: rgba(255,107,122,.22); }
+
+    .narrative{
+      line-height:1.55;
+      color: rgba(223,233,255,.90);
+      font-size: 14px;
+      white-space: pre-line;
+    }
+
+    .choices{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-top:12px;
+    }
+    .choice{
+      text-align:left;
+      padding: 12px 12px;
+      border-radius: 16px;
+      border:1px solid rgba(130,170,255,.14);
+      background: linear-gradient(180deg, rgba(10,16,34,.55), rgba(10,16,34,.35));
+      cursor:pointer;
+      transition: transform .08s ease, border-color .18s ease, background .18s ease;
+      position:relative;
+      overflow:hidden;
+    }
+    .choice:hover{
+      transform: translateY(-1px);
+      border-color: rgba(124,247,255,.30);
+      background: linear-gradient(180deg, rgba(10,16,34,.62), rgba(10,16,34,.38));
+    }
+    .choice:active{ transform: translateY(0); }
+
+    .choiceTop{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .choiceTitle{
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing:.04em;
+      margin:0;
+      color: rgba(223,233,255,.92);
+    }
+    .choiceDesc{
+      margin:6px 0 0;
+      color: rgba(223,233,255,.72);
+      font-size: 13px;
+      line-height:1.45;
+    }
+    .delta{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      align-items:center;
+      min-width: 210px;
+    }
+    .tag{
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius:999px;
+      border:1px solid rgba(130,170,255,.14);
+      background: rgba(7,10,18,.35);
+      color: rgba(223,233,255,.84);
+      white-space:nowrap;
+    }
+    .tag.ok{ border-color: rgba(134,255,176,.22); color: rgba(134,255,176,.92); }
+    .tag.bad{ border-color: rgba(255,107,122,.26); color: rgba(255,107,122,.92); }
+    .tag.neu{ border-color: rgba(255,208,138,.18); color: rgba(255,208,138,.92); }
+
+    .log{
+      max-height: 420px;
+      overflow:auto;
+      padding-right:6px;
+    }
+    .log::-webkit-scrollbar{ width:10px }
+    .log::-webkit-scrollbar-thumb{
+      background: rgba(130,170,255,.18);
+      border-radius:999px;
+      border:2px solid rgba(10,16,34,.50);
+    }
+    .entry{
+      border:1px solid rgba(130,170,255,.12);
+      background: linear-gradient(180deg, rgba(10,16,34,.45), rgba(10,16,34,.25));
+      border-radius: 16px;
+      padding: 10px 10px;
+      margin-bottom:10px;
+    }
+    .entryHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:6px;
+    }
+    .entryHeader b{
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing:.04em;
+      color: rgba(223,233,255,.90);
+    }
+    .entryHeader span{
+      font-family: var(--mono);
+      font-size: 11px;
+      color: rgba(223,233,255,.55);
+    }
+    .entry p{
+      margin:0;
+      color: rgba(223,233,255,.76);
+      font-size: 13px;
+      line-height:1.45;
+      white-space: pre-line;
+    }
+
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:20px;
+      transform:translateX(-50%);
+      z-index:10;
+      max-width: 900px;
+      width: calc(100% - 24px);
+      background: rgba(10,16,34,.82);
+      border:1px solid rgba(130,170,255,.16);
+      border-radius: 16px;
+      box-shadow: 0 18px 70px rgba(0,0,0,.6);
+      padding: 12px 12px;
+      display:none;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      backdrop-filter: blur(10px);
+    }
+    .toast.show{ display:flex; animation: pop .16s ease-out; }
+    @keyframes pop{ from{ transform:translateX(-50%) translateY(6px); opacity:.2 } to{ transform:translateX(-50%) translateY(0); opacity:1 } }
+    .toast .msg{
+      color: rgba(223,233,255,.85);
+      font-size: 13px;
+      line-height:1.45;
+      white-space: pre-line;
+    }
+    .toast .close{
+      flex:0 0 auto;
+      border:none;
+      background: transparent;
+      color: rgba(223,233,255,.75);
+      font-family: var(--mono);
+      cursor:pointer;
+      padding: 6px 8px;
+      border-radius: 12px;
+    }
+    .toast .close:hover{ background: rgba(255,255,255,.06); }
+
+    .ending{
+      text-align:center;
+      padding: 20px 12px;
+    }
+    .ending h2{
+      margin: 0 0 8px;
+      font-family: var(--mono);
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-size: 14px;
+    }
+    .ending p{
+      margin: 0 auto 14px;
+      max-width: 680px;
+      color: rgba(223,233,255,.80);
+      line-height:1.5;
+    }
+    .flashDanger{
+      animation: dangerFlash .35s ease;
+    }
+    @keyframes dangerFlash{
+      0%{ filter: none; }
+      35%{ filter: drop-shadow(0 0 18px rgba(255,107,122,.26)); }
+      100%{ filter:none; }
+    }
   </style>
 </head>
 <body>
-  <div class="bg-drift"></div>
-  <div class="grain"></div>
-  <div class="glitch" id="glitch"></div>
+  <div class="starfield"></div>
+  <div class="scanlines"></div>
 
   <div class="wrap">
     <header>
       <div class="brand">
-        <div class="logo" aria-hidden="true"></div>
-        <div>
-          <h1 id="gameTitle">Кошмар проекта</h1>
-          <div class="subtitle" id="gameSub">интерактивная история про сроки, бюджет и то, что проснулось в брифе</div>
+        <div class="title">
+          <div class="sigil" aria-hidden="true"></div>
+          <div>
+            <h1>CBONDS: Полёт к Центру Галактики</h1>
+            <p class="subtitle">
+              Вы — капитан корабля (владелец продукта). Каждый выбор меняет стресс и прогресс. Ваша цель — довести миссии до результата
+              и не сгореть в гиперпространстве.
+            </p>
+          </div>
         </div>
       </div>
-
-      <div class="top-right">
-        <div class="pill" id="pillDay"><span class="dot"></span><span>День: <b id="stDay">1</b></span></div>
-        <div class="pill" id="pillBudget"><span class="dot"></span><span>Бюджет: <b id="stBudget">100</b></span></div>
-        <div class="pill" id="pillStress"><span class="dot"></span><span>Стресс: <b id="stStress">0</b></span></div>
-        <div class="pill" id="pillScope"><span class="dot"></span><span>Скоуп: <b id="stScope">1</b></span></div>
-        <div class="pill"><span class="dot"></span><span>Фокус: <b id="stFocus">100</b></span></div>
+      <div class="topActions">
+        <button class="btn secondary" id="btnHelp">Справка</button>
+        <button class="btn" id="btnSave">Сохранить</button>
+        <button class="btn" id="btnLoad">Загрузить</button>
+        <button class="btn danger" id="btnReset">Новая игра</button>
       </div>
     </header>
 
     <div class="grid">
-      <!-- Main -->
-      <section class="card" id="mainCard">
-        <div class="art">
-          <div class="glow"></div>
-          <svg viewBox="0 0 1200 240" preserveAspectRatio="none" aria-hidden="true">
-            <defs>
-              <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="rgba(255,255,255,.20)"/>
-                <stop offset="1" stop-color="rgba(255,255,255,0)"/>
-              </linearGradient>
-              <filter id="blur">
-                <feGaussianBlur stdDeviation="4"/>
-              </filter>
-            </defs>
-            <path d="M0,180 C140,120 260,210 420,150 C580,90 690,200 860,140 C1020,90 1120,160 1200,120 L1200,240 L0,240 Z"
-                  fill="rgba(0,0,0,.18)"/>
-            <path d="M0,150 C150,100 280,210 440,150 C610,85 730,210 900,140 C1050,95 1140,130 1200,95"
-                  stroke="rgba(255,255,255,.22)" stroke-width="2" fill="none"/>
-            <g filter="url(#blur)" opacity=".85">
-              <circle cx="180" cy="90" r="22" fill="url(#g1)"/>
-              <circle cx="520" cy="70" r="28" fill="url(#g1)"/>
-              <circle cx="860" cy="82" r="24" fill="url(#g1)"/>
-            </g>
-          </svg>
-        </div>
-
-        <div class="card-inner">
-          <div class="scene-head">
-            <div>
-              <h2 class="scene-title" id="nodeTitle">Загрузка…</h2>
-              <div class="tiny" id="nodeMeta"></div>
-            </div>
-            <div class="badge" id="nodeBadge">Глава 1</div>
+      <!-- LEFT: scene -->
+      <section class="card" aria-label="Сцена">
+        <div class="cardInner">
+          <div class="sectionTitle">
+            <span>Панель капитана</span>
+            <small id="clock">Система: CBONDS-FLEET / Канал: безопасный</small>
           </div>
 
-          <p class="scene-text" id="nodeText"></p>
-          <div class="whisper" id="whisper" hidden></div>
+          <div class="hud">
+            <div class="hudRow">
+              <div class="hudLabel">🚀 Прогресс полёта</div>
+              <div class="bar" aria-label="Прогресс"><i id="barProgress"></i></div>
+              <div class="badge" id="valProgress">0%</div>
+            </div>
+
+            <div class="hudRow">
+              <div class="hudLabel">🧠 Стресс</div>
+              <div class="bar danger" aria-label="Стресс"><i id="barStress"></i></div>
+              <div class="badge" id="valStress">0%</div>
+            </div>
+
+            <div class="hudRow">
+              <div class="hudLabel">⏳ Цикл</div>
+              <div class="badge" id="valCycle">1</div>
+              <div class="hudLabel">🛰 Загруженность флота</div>
+              <div class="badge" id="valFleetLoad">Средняя</div>
+            </div>
+          </div>
+
+          <div class="galaxy" aria-label="Карта галактики">
+            <div class="galaxyCanvas" id="galaxyCanvas">
+              <div class="routeLine" aria-hidden="true"></div>
+              <div class="ship" id="ship"></div>
+              <div class="center" aria-hidden="true" title="Центр Галактики"></div>
+            </div>
+            <div class="legend">
+              <span>Планета Клиентов</span>
+              <span>Центр Галактики</span>
+            </div>
+          </div>
+
+          <hr style="border:none;border-top:1px solid rgba(130,170,255,.14); margin:14px 0;" />
+
+          <div class="sectionTitle">
+            <span id="sceneTitle">Сцена</span>
+            <small id="sceneHint">—</small>
+          </div>
+
+          <div class="sceneMeta">
+            <div class="pill cycle" id="sceneCyclePill">Цикл 1</div>
+            <div class="pill node" id="sceneNodePill">Узел: …</div>
+            <div class="pill risk" id="sceneRiskPill" style="display:none;">Риск: …</div>
+          </div>
+
+          <div class="narrative" id="sceneText"></div>
 
           <div class="choices" id="choices"></div>
 
-          <div class="row">
-            <button class="ghost" id="restartBtn" type="button">Начать заново</button>
-            <button class="ghost" id="backBtn" type="button" disabled>Шаг назад</button>
-            <button class="ghost" id="skipBtn" type="button">Пропустить анимацию текста</button>
-          </div>
-
-          <div class="tiny" style="margin-top:10px;">
-            Редактирование: все сцены лежат в объекте <code>story</code> ниже.
-          </div>
+          <div id="ending" class="ending" style="display:none;"></div>
         </div>
       </section>
 
-      <!-- Side -->
-      <aside class="card">
-        <div class="card-inner">
-          <div class="panel-title">
-            <h2>Панель проекта</h2>
-            <div class="tiny">
-              <label style="display:inline-flex; gap:8px; align-items:center; cursor:pointer;">
-                <input type="checkbox" id="audioToggle" checked />
-                звук
-              </label>
-              &nbsp;·&nbsp;
-              <label style="display:inline-flex; gap:8px; align-items:center; cursor:pointer;">
-                <input type="checkbox" id="typeToggle" checked />
-                печать
-              </label>
-            </div>
+      <!-- RIGHT: log -->
+      <aside class="card" aria-label="Журнал">
+        <div class="cardInner">
+          <div class="sectionTitle">
+            <span>Журнал полёта</span>
+            <small>События и последствия</small>
           </div>
-
-          <div class="meter">
-            <div class="meter-top">
-              <div style="font-weight:900;">Creep-meter</div>
-              <div class="tiny" id="creepLabel">спокоен</div>
-            </div>
-            <div class="bar"><div id="creepBar"></div></div>
-            <div class="tiny" id="creepHint" style="margin-top:8px;">
-              Чем выше стресс и скоуп — тем больше “оно” вмешивается.
-            </div>
+          <div class="log" id="log"></div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn secondary" id="btnExport">Экспорт лога</button>
+            <button class="btn" id="btnNext" title="Если выборов нет — продолжить сценарий">Продолжить</button>
           </div>
-
-          <div class="kv">
-            <div class="k">
-              <div class="lbl">Риск срыва</div>
-              <div class="val" id="riskVal">низкий</div>
-            </div>
-            <div class="k">
-              <div class="lbl">Репутация</div>
-              <div class="val" id="repVal">ровная</div>
-            </div>
-          </div>
-
-          <div class="map">
-            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-              <div style="font-weight:900; font-size:12px;">Прогресс истории</div>
-              <div class="tiny"><span id="stepsNow">0</span>/<span id="stepsMax">14</span></div>
-            </div>
-            <div class="dots" id="dots"></div>
-          </div>
-
-          <details open>
-            <summary>Журнал решений</summary>
-            <div class="log" id="log"></div>
-          </details>
-
-          <details>
-            <summary>Справка по условиям</summary>
-            <div class="tiny" style="margin-top:10px; line-height:1.6;">
-              Некоторые ответы скрыты, пока не выполнены условия:
-              <br>• бюджет / стресс / фокус
-              <br>• флаги (например: <code>contractSigned</code>, <code>stakeholdersAligned</code>)
-              <br><br>
-              Это помогает создавать “секретные” ветки и ощущение интерактива.
-            </div>
-          </details>
+          <p style="margin:10px 0 0; color:rgba(223,233,255,.55); font-size:12px; line-height:1.45;">
+            Подсказка: «Репутация в Совете» скрыта, но влияет на вероятность успеха некоторых действий.
+          </p>
         </div>
       </aside>
     </div>
   </div>
 
-<script>
-/** =========================================
- *  STORY: здесь вы меняете тексты и ветки
- *  ========================================= */
-const story = {
-  meta: {
-    title: "Кошмар проекта",
-    subtitle: "интерактивная история про сроки, бюджет и то, что проснулось в брифе",
-    maxSteps: 14,
-    whispers: [
-      "Это ведь последняя правка. Последняя.",
-      "Ты слышишь? Бриф дышит.",
-      "Сроки — это лишь предложение.",
-      "Если ты скажешь “да” ещё раз — оно улыбнётся.",
-      "Чем тише ты споришь, тем громче растёт скоуп.",
-      "Ты контролируешь проект… или проект контролирует тебя?"
-    ],
-    randomEvents: [
-      { id:"late_message", chance: 0.18, text:"Ночью приходит сообщение: “Я тут подумал…”.", delta:{ stress:+2, focus:-6 }, glitch:true },
-      { id:"supportive_team", chance: 0.12, text:"Команда сама предлагает план стабилизации.", delta:{ stress:-2, focus:+4 } },
-      { id:"client_praise", chance: 0.10, text:"Клиент хвалит. На секунду становится легче.", delta:{ stress:-1 } },
-      { id:"scope_seed", chance: 0.14, text:"В документе внезапно появляется новый раздел “Обязательно”.", delta:{ scope:+1, stress:+1 }, glitch:true },
-    ],
-  },
-
-  initialState: {
-    day: 1,
-    budget: 100,
-    stress: 0,
-    scope: 1,
-    focus: 100,  // энергия/ясность
-    rep: 0,      // -10..+10 условно
-    steps: 0,
-    flags: {
-      contractSigned: false,
-      stakeholdersAligned: false,
-      changeProcess: false,
-      mvpAgreed: false,
-      devOnYourSide: false,
-      creepAwake: false,
-      legalInvolved: false,
-      qaInvolved: false,
-      pitchWon: false,
-    }
-  },
-
-  nodes: {
-    start: {
-      chapter: 1,
-      title: "Проект начинается",
-      text:
-`Ты — PM. Клиент “важный”, сроки “вчера”, бюджет “скромный”.
-Бриф выглядит невинно: “лендинг + форма”.
-
-Проблема в том, что внутри брифа есть место, куда никто не смотрит слишком долго.`,
-      choices: [
-        {
-          label: "Зафиксировать рамки: цели → срок → бюджет → критерии готовности",
-          next: "frame",
-          delta: { stress:+1, focus:-2, rep:+1 }
-        },
-        {
-          label: "Сказать “да, конечно” и стартануть быстрее всех",
-          next: "yes_start",
-          delta: { scope:+1, stress:+1, focus:-4 }
-        },
-        {
-          label: "Собрать команду и провести kick-off с рисками",
-          next: "kickoff",
-          delta: { day:+1, focus:-3, rep:+1 }
-        },
-        {
-          label: "Сразу отправить договор и условия change request",
-          next: "contract",
-          delta: { day:+1, stress:+1, rep:+1 }
-        },
-      ]
-    },
-
-    frame: {
-      chapter: 1,
-      title: "Рамки и границы",
-      text:
-`Ты предлагаешь короткий документ: “что делаем / что не делаем / как меняем”.
-Клиент отвечает: “Ок… но добавим ещё одну маленькую фичу”.
-
-Слова “маленькая фича” звучат как заклинание.`,
-      choices: [
-        { label: "Попросить приоритизацию (Must/Should/Could)", next:"prio", delta:{ day:+1, stress:+1, focus:-3 } },
-        { label: "Согласиться, но записать в backlog", next:"backlog", delta:{ scope:+1, stress:+1, focus:-3 } },
-        { label: "Сразу оформить change request (оценка + влияние)", next:"change_req", delta:{ day:+1, rep:+1 }, setFlags:{ changeProcess:true } },
-      ]
-    },
-
-    contract: {
-      chapter: 1,
-      title: "Договор",
-      text:
-`Ты отправляешь договор и отдельным пунктом: “изменения → оценка → согласование”.
-Клиент читает. Долго. Очень долго.
-
-Пауза в переписке ощущается как сквозняк в темноте.`,
-      choices: [
-        { label:"Мягко дожать: созвон на 15 минут, чтобы закрыть вопросы", next:"contract_call", delta:{ day:+1, stress:+1, focus:-4 } },
-        { label:"Ждать и параллельно делать только pre-production (без разработки)", next:"preprod", delta:{ day:+1, focus:-2 } },
-        { label:"Согласиться стартовать без договора (быстро-быстро)", next:"no_contract", delta:{ stress:+2, scope:+1, rep:-1 } },
-      ]
-    },
-
-    kickoff: {
-      chapter: 1,
-      title: "Kick-off",
-      text:
-`Команда спрашивает: “что точно в MVP?”. Ты видишь шанс сделать проект конечным.
-Но клиент уже шлёт Figma-ссылки и голосовые.
-
-В одном из голосовых слышится тихое: “и ещё…”`,
-      choices: [
-        { label:"Сформировать MVP (1 страница + 1 форма + 1 интеграция)", next:"mvp_plan", delta:{ day:+1, rep:+1 }, setFlags:{ mvpAgreed:true } },
-        { label:"Начать параллельно: дизайн + dev + контент (потом разберёмся)", next:"parallel", delta:{ scope:+1, stress:+2, focus:-6 } },
-        { label:"Попросить клиента выбрать один KPI и привязать всё к нему", next:"kpi", delta:{ day:+1, stress:+1, rep:+1 } },
-      ]
-    },
-
-    yes_start: {
-      chapter: 1,
-      title: "Быстрый старт",
-      text:
-`Ты говоришь “да”. Клиент отвечает списком из 12 пунктов.
-Почти каждый пункт заканчивается словом “быстро”.
-
-Ты ловишь себя на мысли: проект уже пишет тебе ТЗ.`,
-      choices: [
-        { label:"Включить режим “приоритеты или ничего”", next:"prio", delta:{ day:+1, stress:+1, rep:+1 } },
-        { label:"Согласиться и “разрулим по ходу”", next:"scope_grows", delta:{ scope:+2, stress:+2, budget:-8, focus:-8 }, setFlags:{ creepAwake:true } },
-        { label:"Схитрить: принять всё, но принести план с этапами", next:"stages", delta:{ day:+1, stress:+1, rep:+1 } },
-      ]
-    },
-
-    contract_call: {
-      chapter: 1,
-      title: "15 минут созвона",
-      text:
-`На созвоне появляется ещё один человек: “я тоже отвечаю за продукт”.
-Потом ещё один: “я про бренд”.
-
-И ты понимаешь: стейкхолдеров больше, чем строк в брифе.`,
-      choices: [
-        { label:"Зафиксировать роли и единый голос клиента", next:"stakeholders", delta:{ day:+1, stress:+1, rep:+1 }, setFlags:{ stakeholdersAligned:true } },
-        { label:"Вежливо выдержать и пообещать “черновую оценку завтра”", next:"estimate", delta:{ day:+1, stress:+2, focus:-6 } },
-        { label:"Попросить подписать договор сегодня, иначе стоп", next:"hardline", delta:{ stress:+2, rep:+1 }, req:{ focusMin:40 } },
-      ]
-    },
-
-    preprod: {
-      chapter: 1,
-      title: "Pre-production",
-      text:
-`Ты делаешь структуру, риски, план, список вопросов.
-Это скучно. Зато безопасно.
-
-Клиент пишет: “А почему не видно прогресса?”`,
-      choices: [
-        { label:"Показать прототип и roadmap (без кода)", next:"roadmap_show", delta:{ rep:+1, focus:-2 } },
-        { label:"Сделать “демо” на статике, чтобы снять напряжение", next:"static_demo", delta:{ day:+1, budget:-6, stress:+1, focus:-3 } },
-        { label:"Сдаться и начать разработку без договора", next:"no_contract", delta:{ stress:+2, scope:+1, rep:-1 } },
-      ]
-    },
-
-    no_contract: {
-      chapter: 1,
-      title: "Без договора",
-      text:
-`Ты стартуешь без формальностей. Оно довольно.
-Внутри проекта появляется новая константа: “можно менять всё”.
-
-И чем меньше правил, тем быстрее растёт то, что ты строишь.`,
-      choices: [
-        { label:"Срочно вернуть процесс изменений (CR) задним числом", next:"change_req", delta:{ day:+1, stress:+1 }, setFlags:{ changeProcess:true, creepAwake:true } },
-        { label:"Продолжать без правил, но ускорить релиз", next:"rush", delta:{ day:+1, stress:+2, focus:-8, scope:+1 }, setFlags:{ creepAwake:true } },
-      ]
-    },
-
-    prio: {
-      chapter: 2,
-      title: "Приоритизация",
-      text:
-`Ты просишь расставить Must/Should/Could.
-Клиент отвечает: “всё — Must”.
-
-На секунду тишина становится громче.`,
-      choices: [
-        { label:"Предложить релиз по этапам (MVP → итерации)", next:"mvp_plan", delta:{ day:+1, stress:+1, rep:+1 }, setFlags:{ mvpAgreed:true } },
-        { label:"Согласиться и “героить” командой", next:"hero", delta:{ stress:+3, budget:-12, focus:-10, rep:-1 } },
-        { label:"Подключить аккаунт/коммерса: пусть подтвердят рамки", next:"account_help", delta:{ day:+1, stress:+1, rep:+1 } },
-      ]
-    },
-
-    backlog: {
-      chapter: 2,
-      title: "Backlog всё стерпит",
-      text:
-`Ты говоришь: “давайте позже”. Клиент кивает.
-Но “позже” любит возвращаться ночью.
-
-Проект начинает напоминать список обещаний.`,
-      choices: [
-        { label:"Оформить CR-процесс и научить клиента жить с ним", next:"change_req", delta:{ day:+1, rep:+1 }, setFlags:{ changeProcess:true } },
-        { label:"Согласиться на один пункт “прямо сейчас”, чтобы снять давление", next:"scope_grows", delta:{ scope:+1, stress:+1, budget:-6, focus:-5 }, setFlags:{ creepAwake:true } },
-        { label:"Устроить demo-ритм: показываем каждую неделю, без добавлений между", next:"cadence", delta:{ day:+1, rep:+2, stress:+1 } },
-      ]
-    },
-
-    change_req: {
-      chapter: 2,
-      title: "Change Request",
-      text:
-`Ты оформляешь изменения: влияние на сроки, бюджет, риски.
-Это похоже на магический круг мелом вокруг проекта.
-
-На секунду “оно” отступает.`,
-      choices: [
-        { label:"Зафиксировать подписи и двигаться дальше", next:"stages", delta:{ day:+1, rep:+1 }, setFlags:{ contractSigned:true } },
-        { label:"Подключить юриста/финансы, чтобы закрыть тему навсегда", next:"legal", delta:{ day:+1, stress:+1, rep:+1 }, setFlags:{ legalInvolved:true, contractSigned:true } },
-        { label:"Сделать одно исключение “ради отношений”", next:"scope_grows", delta:{ scope:+1, stress:+2, rep:-1 }, setFlags:{ creepAwake:true } },
-      ]
-    },
-
-    stakeholders: {
-      chapter: 2,
-      title: "Единый голос",
-      text:
-`Ты предлагаешь правило: один владелец решений, один канал, один статус.
-Стейкхолдеры соглашаются — но неохотно.
-
-Пока они соглашаются, в проекте кто-то переставляет сроки.`,
-      choices: [
-        { label:"Закрепить weekly-статусы и запрет на “срочно” между ними", next:"cadence", delta:{ day:+1, rep:+2, stress:+1 }, setFlags:{ stakeholdersAligned:true } },
-        { label:"Сделать большой воркшоп по целям/метрикам", next:"workshop", delta:{ day:+2, stress:+2, focus:-6, rep:+1 } },
-        { label:"Попросить dev-тимлида озвучить технические ограничения вслух", next:"tech_truth", delta:{ day:+1, stress:+1, rep:+1 }, setFlags:{ devOnYourSide:true } },
-      ]
-    },
-
-    estimate: {
-      chapter: 2,
-      title: "Оценка",
-      text:
-`Ты считаешь трудозатраты. Получается дорого.
-Клиент пишет: “а можно вдвое дешевле и быстрее?”`,
-      choices: [
-        { label:"Урезать скоуп до MVP", next:"mvp_plan", delta:{ scope:-1, stress:+1, rep:+1 }, setFlags:{ mvpAgreed:true } },
-        { label:"Сказать “попробуем ужаться” (опасно)", next:"hero", delta:{ budget:-18, stress:+2, focus:-8, rep:-1 }, setFlags:{ creepAwake:true } },
-        { label:"Поставить выбор: дешевле ИЛИ быстрее", next:"tradeoff", delta:{ day:+1, stress:+1, rep:+1 }, req:{ focusMin:35 } },
-      ]
-    },
-
-    mvp_plan: {
-      chapter: 3,
-      title: "MVP-план",
-      text:
-`Ты формулируешь MVP как конечный объект. Это приятно.
-Ты даже видишь дату, когда всё закончится.
-
-Но внутри проекта что-то хихикает.`,
-      choices: [
-        { label:"Дожать MVP и закрыть фазу", next:"build_mvp", delta:{ day:+2, stress:-1, focus:-4, rep:+1 } },
-        { label:"Добавить ещё одну “маленькую” правку перед стартом", next:"scope_grows", delta:{ scope:+1, stress:+1, focus:-4 }, setFlags:{ creepAwake:true } },
-        { label:"Включить QA заранее (чтобы не утонуть в баг-аду)", next:"qa", delta:{ day:+1, budget:-6, rep:+1 }, setFlags:{ qaInvolved:true } },
-      ]
-    },
-
-    stages: {
-      chapter: 3,
-      title: "Этапы",
-      text:
-`Ты приносишь план: MVP → улучшения → экспериментальные хотелки.
-Клиент соглашается (словами).`,
-      choices: [
-        { label:"Устроить первый demo-ритм и держать линию", next:"cadence", delta:{ day:+1, rep:+2, stress:+1 } },
-        { label:"Сделать быстрый “вау-прототип”, чтобы закрепить доверие", next:"wow", delta:{ day:+1, budget:-10, stress:+1, rep:+2 } },
-        { label:"Сразу обозначить конец: критерии приёмки (Definition of Done)", next:"dod", delta:{ day:+1, rep:+2, stress:+1 } },
-      ]
-    },
-
-    cadence: {
-      chapter: 3,
-      title: "Ритм",
-      text:
-`Каждую неделю — демо. Между демо — никаких “ещё чуть-чуть”.
-Это работает… пока клиент не пишет: “Но это же мелочь”.`,
-      choices: [
-        { label:"Ответить: мелочь = CR, без исключений", next:"hold_line", delta:{ rep:+2, stress:+1 }, req:{ flags:["changeProcess"] } },
-        { label:"Сделать одно исключение (чтобы не портить отношения)", next:"scope_grows", delta:{ scope:+1, stress:+2, rep:-1 }, setFlags:{ creepAwake:true } },
-        { label:"Предложить “swap”: добавляем мелочь, но убираем пункт из MVP", next:"swap", delta:{ day:+1, rep:+1, stress:+1 } },
-      ]
-    },
-
-    wow: {
-      chapter: 3,
-      title: "Вау-прототип",
-      text:
-`Ты делаешь эффектное демо. Клиент впечатлён.
-А потом впечатление превращается в ожидание.
-
-Ожидание — любимая пища Скоупа.`,
-      choices: [
-        { label:"Зафиксировать: демо ≠ готовый продукт (и вернуться к плану)", next:"hold_line", delta:{ rep:+1, stress:+1 } },
-        { label:"Продолжать “вауить” (пока не закончится бюджет)", next:"burn", delta:{ budget:-20, stress:+2, focus:-8, rep:+1 }, setFlags:{ creepAwake:true } },
-        { label:"Использовать доверие, чтобы продавить контракт и CR-процесс", next:"legal", delta:{ day:+1, rep:+2 }, req:{ focusMin:30 } },
-      ]
-    },
-
-    dod: {
-      chapter: 3,
-      title: "Definition of Done",
-      text:
-`Ты пишешь критерии готовности: что значит “сделано”.
-Слова выглядят как замок на двери.
-
-За дверью что-то ходит кругами.`,
-      choices: [
-        { label:"Согласовать и подписать критерии", next:"build_mvp", delta:{ day:+1, rep:+2, stress:+1 }, setFlags:{ contractSigned:true } },
-        { label:"Оставить как “рекомендацию”, чтобы не спорить", next:"scope_grows", delta:{ scope:+1, stress:+2, rep:-1 }, setFlags:{ creepAwake:true } },
-      ]
-    },
-
-    account_help: {
-      chapter: 2,
-      title: "Подключение аккаунта",
-      text:
-`Аккаунт-менеджер умеет говорить “нет” так, что это звучит как забота.
-Клиент чуть смягчается.
-
-Но проект уже запомнил твой первый “да”.`,
-      choices: [
-        { label:"Вернуть разговор к KPI и MVP", next:"mvp_plan", delta:{ day:+1, rep:+2, stress:+1 }, setFlags:{ mvpAgreed:true } },
-        { label:"Согласовать компромисс: 2 Must, остальное в итерации", next:"stages", delta:{ day:+1, rep:+2, stress:+1 } },
-        { label:"Незаметно пообещать “ещё одну мелочь” (опасно)", next:"scope_grows", delta:{ scope:+1, stress:+2, rep:-1 }, setFlags:{ creepAwake:true } },
-      ]
-    },
-
-    kpi: {
-      chapter: 2,
-      title: "Один KPI",
-      text:
-`Ты просишь выбрать одну метрику.
-Клиент выбирает две. Потом три.
-
-КPI начинают плодиться, как требования.`,
-      choices: [
-        { label:"Свести к одному “главному” и остальные — вторичные", next:"mvp_plan", delta:{ day:+1, rep:+1, stress:+1 }, setFlags:{ mvpAgreed:true } },
-        { label:"Согласиться на несколько KPI и увеличить бюджет/срок", next:"tradeoff", delta:{ day:+1, stress:+1, rep:+1 } },
-        { label:"Сделать A/B как эксперимент позже (после MVP)", next:"stages", delta:{ day:+1, rep:+2, stress:+1 } },
-      ]
-    },
-
-    tech_truth: {
-      chapter: 3,
-      title: "Техническая правда",
-      text:
-`Тимлид говорит: “это нельзя сделать быстро и качественно”.
-В комнате появляется редкая вещь — реальность.
-
-Реальность раздражает Скоуп.`,
-      choices: [
-        { label:"Сделать “выбор ограничений” клиенту: быстро/дёшево/качественно", next:"tradeoff", delta:{ day:+1, rep:+2, stress:+1 } },
-        { label:"Спрятать правду, чтобы не спорить (плохая идея)", next:"hero", delta:{ stress:+3, rep:-2, focus:-8 }, setFlags:{ creepAwake:true } },
-        { label:"Предложить альтернативу: проще архитектура, меньше функций", next:"mvp_plan", delta:{ day:+1, rep:+2, stress:+1 }, setFlags:{ mvpAgreed:true } },
-      ]
-    },
-
-    tradeoff: {
-      chapter: 3,
-      title: "Треугольник",
-      text:
-`Ты ставишь выбор: либо быстрее, либо дешевле, либо богаче по функционалу.
-Клиент молчит. Потом пишет: “а нельзя всё сразу?”.`,
-      choices: [
-        { label:"Твёрдо: нельзя. Выберите два.", next:"hold_line", delta:{ rep:+2, stress:+1 }, req:{ focusMin:30 } },
-        { label:"Согласиться “попробовать” (оно довольно)", next:"burn", delta:{ stress:+2, budget:-12, focus:-10 }, setFlags:{ creepAwake:true } },
-        { label:"Предложить: “всё сразу” = больше бюджета/срока", next:"pitch", delta:{ day:+1, rep:+1, stress:+1 } },
-      ]
-    },
-
-    hardline: {
-      chapter: 2,
-      title: "Жёсткая линия",
-      text:
-`Ты говоришь: “без подписи — стоп”.
-На секунду кажется, что ты победил.
-Потом приходит сообщение: “Ок. Подпишем.”
-
-Скоуп замирает. И делает пометку.`,
-      choices: [
-        { label:"Подписали. Вернуться к MVP и CR", next:"mvp_plan", delta:{ day:+1, rep:+2, stress:+1 }, setFlags:{ contractSigned:true, changeProcess:true, mvpAgreed:true } },
-        { label:"Отпраздновать победу маленькой уступкой (не делай этого)", next:"scope_grows", delta:{ scope:+1, stress:+2, rep:-1 }, setFlags:{ creepAwake:true } },
-      ]
-    },
-
-    roadmap_show: {
-      chapter: 2,
-      title: "Roadmap",
-      text:
-`Ты показываешь план: что когда и почему.
-Клиент впервые задаёт правильный вопрос: “а что мы НЕ делаем?”`,
-      choices: [
-        { label:"Ответить честно и зафиксировать “не делаем” письменно", next:"frame", delta:{ rep:+2, stress:+1 } },
-        { label:"Сказать “посмотрим” (и открыть дверь)", next:"scope_grows", delta:{ scope:+1, stress:+1, rep:-1 }, setFlags:{ creepAwake:true } },
-      ]
-    },
-
-    static_demo: {
-      chapter: 2,
-      title: "Статичное демо",
-      text:
-`Ты делаешь имитацию прогресса. Это работает. На день.
-Потом клиент спрашивает: “а где админка?”.`,
-      choices: [
-        { label:"Объяснить, что админка не в scope. Оформить CR.", next:"change_req", delta:{ day:+1, rep:+1, stress:+1 }, setFlags:{ changeProcess:true } },
-        { label:"Пообещать админку “минимальную” (опасно)", next:"scope_grows", delta:{ scope:+2, stress:+2, budget:-10, rep:-1 }, setFlags:{ creepAwake:true } },
-      ]
-    },
-
-    qa: {
-      chapter: 3,
-      title: "QA подключён",
-      text:
-`QA задаёт неприятные вопросы, но спасает от релиза-кошмара.
-Проект ненавидит QA.
-
-Проект любит баги: баги — это повод добавить функциональность.`,
-      choices: [
-        { label:"Закрепить гейт: без QA — не релиз", next:"build_mvp", delta:{ day:+1, rep:+2, stress:+1 } },
-        { label:"Отключить QA “пока”, чтобы успеть (не надо)", next:"rush", delta:{ stress:+2, rep:-2, focus:-8 }, setFlags:{ creepAwake:true } },
-      ]
-    },
-
-    build_mvp: {
-      chapter: 4,
-      title: "Сборка MVP",
-      text:
-`Вы приближаетесь к релизу.
-Но чем ближе релиз — тем активнее шевелится “оно”.
-
-Скоуп начинает разговаривать фразами клиента.`,
-      choices: [
-        { label:"Сделать релиз-кандидат и заморозить изменения", next:"freeze", delta:{ day:+1, stress:+1, rep:+2 } },
-        { label:"Пустить маленькую правку перед релизом (ошибка)", next:"scope_grows", delta:{ scope:+1, stress:+2, focus:-6, rep:-1 }, setFlags:{ creepAwake:true } },
-        { label:"Попросить клиента подтвердить критерии приёмки сейчас", next:"acceptance", delta:{ day:+1, stress:+1, rep:+2 }, req:{ flags:["contractSigned"] } },
-      ]
-    },
-
-    freeze: {
-      chapter: 4,
-      title: "Заморозка",
-      text:
-`Ты объявляешь freeze. Команда выдыхает.
-Клиент пишет: “но вот это точно можно успеть, это же мелочь”.
-
-Скоуп улыбается — чуть заметно.`,
-      choices: [
-        { label:"Нет. Freeze есть freeze.", next:"release", delta:{ stress:+1, rep:+2 } },
-        { label:"Ок, одна мелочь (и всё)", next:"scope_grows", delta:{ scope:+1, stress:+2, rep:-1 }, setFlags:{ creepAwake:true } },
-        { label:"Вариант: перенести мелочь в релиз+1 (официально)", next:"release", delta:{ rep:+2, stress:+1 }, req:{ flags:["changeProcess"] } },
-      ]
-    },
-
-    acceptance: {
-      chapter: 4,
-      title: "Приёмка",
-      text:
-`Ты просишь подтвердить критерии. Клиент отвечает: “да”.
-Потом пишет: “а можно ещё один сценарий?”
-
-Тишина. Потом шорох страниц.`,
-      choices: [
-        { label:"Это CR в релиз+1. Сейчас выпускаем.", next:"release", delta:{ rep:+2, stress:+1 } },
-        { label:"Добавить сценарий, но убрать другой (swap)", next:"swap", delta:{ day:+1, stress:+1, rep:+1 } },
-      ]
-    },
-
-    swap: {
-      chapter: 4,
-      title: "Swap",
-      text:
-`Ты предлагаешь обмен: добавляем X, убираем Y.
-Клиент впервые задумывается, что “всё” не помещается в “сейчас”.`,
-      choices: [
-        { label:"Клиент выбирает: выкидываем лишнее → выпускаем", next:"release", delta:{ rep:+2, stress:+1 } },
-        { label:"Клиент не выбирает и просит “оставить всё”", next:"burn", delta:{ stress:+2, focus:-8, budget:-10 }, setFlags:{ creepAwake:true } },
-      ]
-    },
-
-    hold_line: {
-      chapter: 3,
-      title: "Держать линию",
-      text:
-`Ты не сдаёшься. Ты говоришь “таков процесс”.
-И внезапно оказывается, что мир не рушится.
-
-Скоуп отступает. На шаг.`,
-      choices: [
-        { label:"Вернуться к MVP и завершить фазу", next:"build_mvp", delta:{ day:+1, stress:-1, rep:+2, focus:+4 } },
-        { label:"Закрепить успех: правила, статусы, CR, приёмка", next:"fortify", delta:{ day:+1, rep:+3, stress:+1 }, setFlags:{ changeProcess:true, contractSigned:true, stakeholdersAligned:true } },
-      ]
-    },
-
-    legal: {
-      chapter: 3,
-      title: "Юрист в переписке",
-      text:
-`Юрист пишет вежливо, но холодно.
-Проект перестаёт расширяться “просто так”.
-
-Где-то в документе кто-то стирает слово “мелочь”.`,
-      choices: [
-        { label:"Подписать всё и двигаться к MVP", next:"mvp_plan", delta:{ day:+1, rep:+2, stress:+1 }, setFlags:{ contractSigned:true, changeProcess:true } },
-        { label:"Сделать паузу и пересобрать ожидания клиенту письмом", next:"reset_mail", delta:{ day:+1, rep:+2, stress:+1 } },
-      ]
-    },
-
-    reset_mail: {
-      chapter: 3,
-      title: "Письмо-пересборка",
-      text:
-`Ты пишешь коротко: цели, рамки, этапы, ответственность.
-Клиент отвечает: “Спасибо. Так понятнее.”
-
-Впервые за долгое время ты чувствуешь контроль.`,
-      choices: [
-        { label:"Идти в сборку MVP", next:"build_mvp", delta:{ day:+1, rep:+2, stress:-1, focus:+6 } },
-        { label:"Сделать финальный воркшоп со стейкхолдерами", next:"workshop", delta:{ day:+2, stress:+2, rep:+2 } },
-      ]
-    },
-
-    workshop: {
-      chapter: 3,
-      title: "Воркшоп",
-      text:
-`Вы обсуждаете цели. Кто-то признаётся: “я думал, это другой продукт”.
-Это больно. Но полезно.
-
-Скоуп не любит правду.`,
-      choices: [
-        { label:"Свести ожидания и зафиксировать единый backlog", next:"fortify", delta:{ day:+1, rep:+3, stress:+1, focus:+4 }, setFlags:{ stakeholdersAligned:true } },
-        { label:"Сделать компромисс: MVP меньше, но релиз быстрее", next:"build_mvp", delta:{ day:+1, stress:+1, rep:+2 } },
-      ]
-    },
-
-    fortify: {
-      chapter: 4,
-      title: "Укрепление",
-      text:
-`Процесс есть. Роли есть. CR есть.
-Скоуп нервничает. Он не привык к границам.
-
-И всё же он пытается.`,
-      choices: [
-        { label:"Выпустить MVP по процессу", next:"release", delta:{ day:+1, rep:+3, stress:-1, focus:+4 } },
-        { label:"Рискнуть “ещё одной мелочью” (не надо)", next:"scope_grows", delta:{ scope:+1, stress:+2, rep:-1 }, setFlags:{ creepAwake:true } },
-      ]
-    },
-
-    rush: {
-      chapter: 3,
-      title: "Гонка",
-      text:
-`Вы ускоряетесь. Текст не успевает за решениями.
-Фокус падает. Ошибки множатся.
-
-В какой-то момент проект начинает решать за тебя.`,
-      choices: [
-        { label:"Остановить, пересобрать план и включить процесс", next:"hold_line", delta:{ day:+1, stress:+2, rep:+1 }, req:{ focusMin:20 } },
-        { label:"Ещё один рывок", next:"burn", delta:{ day:+1, stress:+3, budget:-12, focus:-10 }, setFlags:{ creepAwake:true } },
-      ]
-    },
-
-    hero: {
-      chapter: 3,
-      title: "Героизм",
-      text:
-`Команда задерживается. Ты закрываешь задачи собой.
-Тебя хвалят — и добавляют ещё задач.
-
-Скоуп любит героев. Их проще расходовать.`,
-      choices: [
-        { label:"Остановиться и вернуть границы", next:"hold_line", delta:{ day:+1, stress:+1, rep:+1 } },
-        { label:"Продолжать героить", next:"burn", delta:{ day:+1, stress:+3, budget:-10, focus:-10 }, setFlags:{ creepAwake:true } },
-        { label:"Тайно выкинуть часть задач (чтобы выжить)", next:"secret_cut", delta:{ rep:-2, stress:+1, focus:+2 }, req:{ stressMax:12 } },
-      ]
-    },
-
-    secret_cut: {
-      chapter: 4,
-      title: "Тайный вырез",
-      text:
-`Ты вырезаешь часть требований, никому не сказав.
-Это помогает. На время.
-
-Но проект запоминает предательство.`,
-      choices: [
-        { label:"Признаться и оформить честный swap", next:"swap", delta:{ day:+1, rep:+1, stress:+2 } },
-        { label:"Удержать секрет и дожать релиз", next:"release", delta:{ rep:-1, stress:+2 } },
-      ]
-    },
-
-    burn: {
-      chapter: 4,
-      title: "Выгорание бюджета",
-      text:
-`Бюджет тоньше. Фокус ниже. Стресс выше.
-Скоуп становится… конкретнее.
-
-Он перестаёт быть метафорой.`,
-      choices: [
-        { label:"Позвать помощь (команда/аккаунт/юрист) и заморозить изменения", next:"fortify", delta:{ day:+1, rep:+1, stress:+2 }, req:{ budgetMin:10 } },
-        { label:"Попытаться релизнуться “как есть”", next:"release", delta:{ day:+1, stress:+1 } },
-        { label:"Сдаться: проект становится вечным", next:"ending_eternal", delta:{}, ending:true },
-      ]
-    },
-
-    scope_grows: {
-      chapter: 4,
-      title: "Скоуп растёт",
-      text:
-`Добавилась “маленькая фича”.
-Потом ещё одна.
-Потом ещё.
-
-Проект начал разговаривать твоими сообщениями.`,
-      choices: [
-        { label:"Вернуть контроль: правила, CR, freeze", next:"fortify", delta:{ day:+1, stress:+2, rep:+1 }, setFlags:{ changeProcess:true } },
-        { label:"Продолжать молча. Просто продолжать.", next:"ending_eternal", delta:{}, ending:true },
-        { label:"Ход отчаяния: продать клиенту новый бюджет (официально)", next:"pitch", delta:{ day:+1, stress:+2, rep:+1 }, req:{ repMin:-2 } },
-      ]
-    },
-
-    pitch: {
-      chapter: 4,
-      title: "Перепродажа",
-      text:
-`Ты предлагаешь: “хотите больше — нужно больше ресурса”.
-Клиент либо соглашается, либо уходит.
-
-И вот тут твоя дипломатия решает всё.`,
-      choices: [
-        { label:"Клиент соглашается. Вы спасены.", next:"release", delta:{ budget:+25, rep:+3, stress:-1 }, setFlags:{ pitchWon:true } },
-        { label:"Клиент торгуется. Вы режете MVP.", next:"build_mvp", delta:{ scope:-1, rep:+1, stress:+1 } },
-        { label:"Клиент отказывается. Проект пожирает команду.", next:"ending_eternal", delta:{}, ending:true },
-      ]
-    },
-
-    release: {
-      chapter: 5,
-      title: "Релиз",
-      text:
-`Вы выпускаете продукт.
-Команда выдыхает.
-Клиент доволен (или делает вид).
-
-Скоуп отступает в темноту документа… пока вы не откроете следующий проект.`,
-      choices: [
-        { label:"Финал: зрелый менеджмент (хорошая концовка)", next:"ending_win", delta:{}, ending:true },
-        { label:"Сделать релиз+1 “быстро-быстро” (проверить судьбу)", next:"ending_bittersweet", delta:{}, ending:true },
-      ]
-    },
-
-    ending_win: {
-      chapter: 6,
-      title: "Финал: Проект завершён",
-      text:
-`Ты удержал границы. Ты сделал процесс. Ты выпустил MVP.
-Скоуп не победил. На этот раз.
-
-(Но он запомнил твоё имя.)`,
-      ending:true
-    },
-
-    ending_bittersweet: {
-      chapter: 6,
-      title: "Финал: Релиз+1",
-      text:
-`Релиз успешен. Ты сразу обещаешь “следующую итерацию”.
-Скоуп улыбается, но тихо. Он терпелив.
-
-Ведь теперь у него есть план.`,
-      ending:true
-    },
-
-    ending_eternal: {
-      chapter: 6,
-      title: "Финал: Вечная доработка",
-      text:
-`“Ещё чуть-чуть” превращается в “ещё один спринт”.
-Проект становится процессом. Процесс становится жизнью.
-
-Скоуп больше не за дверью. Он в комнате.`,
-      ending:true
-    },
-  }
-};
-
-/** =========================================
- *  ENGINE
- *  ========================================= */
-const $ = (id)=>document.getElementById(id);
-
-const el = {
-  glitch: $("glitch"),
-  title: $("gameTitle"),
-  sub: $("gameSub"),
-  nodeTitle: $("nodeTitle"),
-  nodeText: $("nodeText"),
-  nodeMeta: $("nodeMeta"),
-  nodeBadge: $("nodeBadge"),
-  whisper: $("whisper"),
-  choices: $("choices"),
-  restart: $("restartBtn"),
-  back: $("backBtn"),
-  skip: $("skipBtn"),
-  stDay: $("stDay"),
-  stBudget: $("stBudget"),
-  stStress: $("stStress"),
-  stScope: $("stScope"),
-  stFocus: $("stFocus"),
-  creepBar: $("creepBar"),
-  creepLabel: $("creepLabel"),
-  creepHint: $("creepHint"),
-  riskVal: $("riskVal"),
-  repVal: $("repVal"),
-  dots: $("dots"),
-  stepsNow: $("stepsNow"),
-  stepsMax: $("stepsMax"),
-  log: $("log"),
-  audioToggle: $("audioToggle"),
-  typeToggle: $("typeToggle"),
-  pillDay: $("pillDay"),
-  pillBudget: $("pillBudget"),
-  pillStress: $("pillStress"),
-  pillScope: $("pillScope"),
-};
-
-let state = structuredClone(story.initialState);
-let currentId = "start";
-let history = [];
-let typing = { running:false, fullText:"", idx:0, timer:null };
-
-const Audio = (() => {
-  let ctx = null;
-  function ensure(){
-    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
-    return ctx;
-  }
-  function beep(freq=220, ms=40, type="sine", gain=0.025){
-    if (!el.audioToggle.checked) return;
-    const c = ensure();
-    const o = c.createOscillator();
-    const g = c.createGain();
-    o.type = type;
-    o.frequency.value = freq;
-    g.gain.value = gain;
-    o.connect(g); g.connect(c.destination);
-    o.start();
-    o.stop(c.currentTime + ms/1000);
-  }
-  function click(){ beep(320, 28, "triangle", 0.02); }
-  function bad(){ beep(120, 60, "sawtooth", 0.03); setTimeout(()=>beep(90, 70, "sawtooth", 0.025), 80); }
-  function good(){ beep(520, 35, "sine", 0.02); setTimeout(()=>beep(680, 35, "sine", 0.018), 60); }
-  return { click, bad, good };
-})();
-
-function clamp(n, a=-9999, b=9999){ return Math.max(a, Math.min(b, n)); }
-function num(v){ return (typeof v==="number" && !Number.isNaN(v)) ? v : 0; }
-
-function hasFlags(reqFlags=[]){
-  for (const f of reqFlags){
-    if (!state.flags[f]) return false;
-  }
-  return true;
-}
-
-function meetsReq(req){
-  if (!req) return true;
-  if (req.dayMin != null && state.day < req.dayMin) return false;
-  if (req.budgetMin != null && state.budget < req.budgetMin) return false;
-  if (req.stressMax != null && state.stress > req.stressMax) return false;
-  if (req.focusMin != null && state.focus < req.focusMin) return false;
-  if (req.scopeMax != null && state.scope > req.scopeMax) return false;
-  if (req.repMin != null && state.rep < req.repMin) return false;
-  if (req.flags && !hasFlags(req.flags)) return false;
-  return true;
-}
-
-function applyDelta(delta){
-  if (!delta) return;
-  for (const [k, dv] of Object.entries(delta)){
-    if (k==="flags") continue;
-    state[k] = clamp(num(state[k]) + num(dv));
-  }
-  // keep within reasonable ranges
-  state.focus = clamp(state.focus, 0, 120);
-  state.stress = clamp(state.stress, 0, 30);
-  state.scope = clamp(state.scope, 0, 30);
-  state.budget = clamp(state.budget, -50, 999);
-  state.rep = clamp(state.rep, -10, 10);
-}
-
-function setFlags(obj){
-  if (!obj) return;
-  for (const [k,v] of Object.entries(obj)){
-    state.flags[k] = !!v;
-  }
-}
-
-function creepScore(){
-  // combine stress + scope and low focus as “creep”
-  const s = state.stress*3 + state.scope*2 + Math.max(0, 70 - state.focus)*0.6;
-  return clamp(Math.round(s), 0, 100);
-}
-
-function labelRisk(){
-  const c = creepScore();
-  if (c < 28) return ["низкий", "ok"];
-  if (c < 55) return ["средний", "warn"];
-  return ["высокий", "bad"];
-}
-
-function labelRep(){
-  if (state.rep >= 6) return "сильная";
-  if (state.rep >= 2) return "ровная+";
-  if (state.rep >= -1) return "ровная";
-  if (state.rep >= -5) return "напряжённая";
-  return "хрупкая";
-}
-
-function updateTopPills(){
-  el.stDay.textContent = state.day;
-  el.stBudget.textContent = state.budget;
-  el.stStress.textContent = state.stress;
-  el.stScope.textContent = state.scope;
-  el.stFocus.textContent = state.focus;
-
-  // dots
-  const [riskTxt, riskLvl] = labelRisk();
-  const pillDots = [
-    [el.pillDay, "ok"],
-    [el.pillBudget, state.budget >= 40 ? "ok" : state.budget >= 15 ? "warn" : "bad"],
-    [el.pillStress, state.stress <= 6 ? "ok" : state.stress <= 12 ? "warn" : "bad"],
-    [el.pillScope, state.scope <= 3 ? "ok" : state.scope <= 6 ? "warn" : "bad"],
-  ];
-  for (const [pill, lvl] of pillDots){
-    const d = pill.querySelector(".dot");
-    d.className = "dot " + (lvl==="ok" ? "ok" : lvl==="warn" ? "warn" : "bad");
-  }
-
-  // right panel
-  const c = creepScore();
-  el.creepBar.style.width = c + "%";
-  if (c < 28){ el.creepLabel.textContent = "спокоен"; el.creepHint.textContent = "Пока границы держатся."; }
-  else if (c < 55){ el.creepLabel.textContent = "шевелится"; el.creepHint.textContent = "Скоуп ищет лазейки."; }
-  else { el.creepLabel.textContent = "проснулся"; el.creepHint.textContent = "Оно вмешивается всё чаще."; }
-
-  el.riskVal.textContent = riskTxt;
-  el.repVal.textContent = labelRep();
-}
-
-function setGlitch(on){
-  if (!on) return;
-  el.glitch.classList.remove("on");
-  // force reflow
-  void el.glitch.offsetWidth;
-  el.glitch.classList.add("on");
-}
-
-function pushLog(choiceLabel){
-  const node = story.nodes[currentId];
-  const div = document.createElement("div");
-  div.className = "log-item";
-  div.innerHTML = `<div><b>${node?.title ?? currentId}</b></div><div class="t">→ ${escapeHtml(choiceLabel)}</div>`;
-  el.log.prepend(div);
-}
-
-function escapeHtml(s){
-  return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
-}
-
-function maybeWhisper(){
-  const node = story.nodes[currentId];
-  if (node?.ending) { el.whisper.hidden = true; return; }
-  const list = story.meta.whispers || [];
-  if (!list.length) { el.whisper.hidden = true; return; }
-
-  const c = creepScore();
-  const prob = c < 28 ? 0.35 : c < 55 ? 0.55 : 0.75;
-  if (Math.random() > prob){ el.whisper.hidden = true; return; }
-  const line = list[Math.floor(Math.random() * list.length)];
-  el.whisper.textContent = line;
-  el.whisper.hidden = false;
-}
-
-function maybeRandomEvent(){
-  const node = story.nodes[currentId];
-  if (node?.ending) return null;
-
-  const events = story.meta.randomEvents || [];
-  for (const e of events){
-    // creep makes events slightly more likely
-    const c = creepScore();
-    const bonus = c >= 55 ? 0.06 : c >= 28 ? 0.03 : 0;
-    const p = (e.chance || 0) + bonus;
-    if (Math.random() < p){
-      applyDelta(e.delta);
-      if (e.glitch) setGlitch(true);
-      return e;
-    }
-  }
-  return null;
-}
-
-function renderProgress(){
-  el.stepsMax.textContent = story.meta.maxSteps;
-  el.stepsNow.textContent = state.steps;
-  el.dots.innerHTML = "";
-  for (let i=1;i<=story.meta.maxSteps;i++){
-    const d = document.createElement("div");
-    d.className = "p";
-    if (i <= state.steps) d.classList.add("on");
-    if (creepScore() >= 55 && i === state.steps) d.classList.add("bad");
-    el.dots.appendChild(d);
-  }
-}
-
-function stopTyping(){
-  if (typing.timer) clearInterval(typing.timer);
-  typing.running = false;
-  typing.timer = null;
-}
-
-function typeText(full){
-  stopTyping();
-  typing.fullText = full;
-  typing.idx = 0;
-  el.nodeText.textContent = "";
-
-  if (!el.typeToggle.checked){
-    el.nodeText.textContent = full;
-    return;
-  }
-
-  typing.running = true;
-  typing.timer = setInterval(() => {
-    typing.idx += 2; // speed
-    el.nodeText.textContent = typing.fullText.slice(0, typing.idx);
-    if (typing.idx >= typing.fullText.length){
-      stopTyping();
-    }
-  }, 12);
-}
-
-function renderNode(){
-  const node = story.nodes[currentId];
-  if (!node){
-    el.nodeTitle.textContent = "Ошибка";
-    el.nodeMeta.textContent = "";
-    el.nodeBadge.textContent = "";
-    typeText(`Не найден узел: ${currentId}`);
-    el.choices.innerHTML = "";
-    el.whisper.hidden = true;
-    return;
-  }
-
-  el.title.textContent = story.meta.title || "Игра";
-  el.sub.textContent = story.meta.subtitle || "";
-  el.nodeTitle.textContent = node.title || "";
-  el.nodeBadge.textContent = "Глава " + (node.chapter ?? "");
-  el.nodeMeta.textContent = `id: ${currentId} · флаги: ${Object.entries(state.flags).filter(([k,v])=>v).map(([k])=>k).slice(0,4).join(", ") || "—"}`;
-
-  // render text with typewriter
-  typeText(node.text || "");
-
-  // choices
-  el.choices.innerHTML = "";
-  if (node.ending){
-    const b = document.createElement("button");
-    b.className = "choice";
-    b.innerHTML = `Сыграть ещё раз<div class="choice-meta"><span class="tag ok">restart</span></div>`;
-    b.addEventListener("click", restart);
-    el.choices.appendChild(b);
-  } else {
-    const visibleChoices = (node.choices || []).filter(ch => meetsReq(ch.req));
-    for (const ch of visibleChoices){
-      const b = document.createElement("button");
-      b.className = "choice";
-
-      const tags = [];
-      if (ch.delta){
-        if (ch.delta.stress > 0) tags.push(`<span class="tag bad">+стресс</span>`);
-        if (ch.delta.stress < 0) tags.push(`<span class="tag ok">-стресс</span>`);
-        if (ch.delta.scope > 0) tags.push(`<span class="tag warn">+скоуп</span>`);
-        if (ch.delta.budget < 0) tags.push(`<span class="tag warn">-бюджет</span>`);
-        if (ch.delta.rep > 0) tags.push(`<span class="tag ok">+репутация</span>`);
-        if (ch.delta.focus < 0) tags.push(`<span class="tag warn">-фокус</span>`);
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <div class="msg" id="toastMsg"></div>
+    <button class="close" id="toastClose">закрыть</button>
+  </div>
+
+  <script>
+    /**********************
+     *  GAME DATA
+     **********************/
+    const FLEET_LOADS = [
+      { name: "Низкая", mod: 1.08 },
+      { name: "Средняя", mod: 1.00 },
+      { name: "Высокая", mod: 0.88 },
+      { name: "Критическая", mod: 0.78 },
+    ];
+
+    // Random “asteroid” disruptions that can appear between stages (chance increases with fleetLoad & stress).
+    const ASTEROID_EVENTS = [
+      {
+        id: "asteroid_hotfix",
+        title: "☄ Астероидная угроза",
+        text:
+`Экстренный сигнал ворвался в цикл и требует немедленного внимания флота.
+Часть миссий может быть снесена с орбиты.`,
+        choices: [
+          {
+            title: "Отдать слот астероиду (стабилизировать систему)",
+            desc: "Снизить хаос, но пожертвовать ближайшей миссией.",
+            delta: { stress: -8, progress: -4, rep: +2, fleetLoadStep: -1 },
+            note: "Флот благодарит за прагматичность. Но Галактика помнит отмену."
+          },
+          {
+            title: "Лоббировать свою миссию даже сейчас",
+            desc: "Попытка сохранить слот ценой доверия.",
+            delta: { stress: +10, progress: +2, rep: -3, fleetLoadStep: +0 },
+            check: { base: 0.55, rep: 0.05 }, // success = keep slot
+            onSuccess: { stress: -2, progress: +3, rep: +1 },
+            onFail: { stress: +6, progress: -6, rep: -2 },
+            note: "Эпическая дуэль аргументов в Совете."
+          },
+          {
+            title: "Переформулировать миссию как 'астероидный щит'",
+            desc: "Переупаковать инициативу так, чтобы её нельзя было выбросить из цикла.",
+            delta: { stress: +4, progress: +4, rep: +1, fleetLoadStep: +0 },
+            check: { base: 0.62, rep: 0.04 },
+            onSuccess: { stress: -4, progress: +4, rep: +2 },
+            onFail: { stress: +5, progress: -3, rep: -1 },
+            note: "Политика космоса: смысл меняется — ресурсы остаются."
+          }
+        ]
+      },
+      {
+        id: "asteroid_key_engineer",
+        title: "☄ Сбой в ангаре",
+        text:
+`Ключевой инженер исчез в гиперпространстве отпусков.
+Сборка корабля зависла.`,
+        choices: [
+          {
+            title: "Давить и напоминать (эскалация)",
+            desc: "Риск испортить отношения, шанс ускорить сборку.",
+            delta: { stress: +8, rep: -1, progress: +1 },
+            check: { base: 0.52, rep: 0.05 },
+            onSuccess: { stress: -2, progress: +6, rep: +1, fleetLoadStep: -1 },
+            onFail: { stress: +6, progress: -2, rep: -2, fleetLoadStep: +0 },
+            note: "Инженеры заняты спасением Галактики, но иногда слышат."
+          },
+          {
+            title: "Смиренно ждать",
+            desc: "Снизить стресс, но потерять темп.",
+            delta: { stress: -6, progress: -1, rep: +1, fleetLoadStep: +0 },
+            note: "Терпение капитана — редкий ресурс."
+          },
+          {
+            title: "Перекинуть часть задач на шаттл IT-флота",
+            desc: "Быстро разгрузить узкое место.",
+            delta: { stress: +3, progress: +3, rep: +1, fleetLoadStep: +1 },
+            check: { base: 0.68, rep: 0.03 },
+            onSuccess: { stress: -3, progress: +4, rep: +1 },
+            onFail: { stress: +4, progress: -2, rep: -1 },
+            note: "Манёвр возможен, если маршрут достаточно локальный."
+          }
+        ]
       }
-      if (ch.req?.flags?.length) tags.push(`<span class="tag">условие</span>`);
+    ];
 
-      b.innerHTML = `${escapeHtml(ch.label)}<div class="choice-meta">${tags.join(" ")}</div>`;
-      b.addEventListener("click", () => choose(ch));
-      el.choices.appendChild(b);
+    // Core storyline staged as nodes. Each node has choices. Some have success/fail checks.
+    const NODES = [
+      {
+        id: "signal",
+        cyclePhase: "📡 Приём сигнала",
+        title: "Приём сигнала с планеты Клиентов",
+        hint: "Входящий сигнал и первое решение",
+        text:
+`📡 Входящий сигнал.
+Планета: Institutional Clients Prime
+Запрос: «Нам нужна новая аналитика по облигациям развивающихся рынков».`,
+        choices: [
+          {
+            title: "Немедленно вынести на Совет",
+            desc: "Скорость — ваш щит. Но цена — стресс и внимание.",
+            delta: { progress: +5, stress: +10, rep: +1 },
+            note: "Капитан проявляет инициативу. Совет насторожен."
+          },
+          {
+            title: "Запросить уточнение требований",
+            desc: "Сначала калибровка траектории, потом — прыжок.",
+            delta: { progress: +2, stress: -5, rep: +2 },
+            note: "Совет доволен осторожностью. Клиенты ворчат."
+          },
+          {
+            title: "Архивировать сигнал",
+            desc: "Сохранить ресурсы сейчас, риск потерять доверие планеты.",
+            delta: { progress: -5, stress: -10, rep: -1 },
+            note: "Галактика не заметила потерю. Клиенты — да."
+          }
+        ],
+      },
+
+      {
+        id: "council_comms",
+        cyclePhase: "🪐 Совет",
+        title: "Совет Межзвёздной Связи",
+        hint: "Проверка аргументации и дипломатии",
+        text:
+`В Совете присутствуют:
+— Главнокомандующий флотом
+— Основатель Вселенной
+— Хранитель Торговых Путей
+— командиры отсеков и офицеры связи
+
+Вопрос звучит просто: «Зачем эта миссия нужна Галактике?»`,
+        choices: [
+          {
+            title: "Говорить про стратегическую ценность",
+            desc: "Ставка на долгий горизонт: рынок, позиционирование, дифференциация.",
+            delta: { stress: +2, rep: +1 },
+            check: { base: 0.62, rep: 0.05 },
+            onSuccess: { progress: +8, stress: -2, rep: +2 },
+            onFail: { progress: +1, stress: +8, rep: -1 },
+            note: "Совет любит масштаб, но ненавидит туман."
+          },
+          {
+            title: "Давить на срочность клиентов",
+            desc: "Ставка на давление реальностью: риск перегрева.",
+            delta: { progress: +3, stress: +5, rep: +0 },
+            check: { base: 0.65, rep: 0.03 },
+            onSuccess: { progress: +5, stress: -1, rep: +1 },
+            onFail: { progress: -2, stress: +6, rep: -2 },
+            note: "Срочность работает, пока вы не злоупотребляете."
+          },
+          {
+            title: "Предложить MVP-миссию",
+            desc: "Минимальный прыжок: быстрее получить сигнал ценности.",
+            delta: { progress: +4, stress: -3, rep: +2 },
+            note: "Совет видит управляемую траекторию. Шансы растут."
+          }
+        ]
+      },
+
+      {
+        id: "star_map",
+        cyclePhase: "🗺 Карта",
+        title: "Построение звёздной карты миссий",
+        hint: "Приоритизация определяет шанс старта",
+        text:
+`Одобренные миссии наносятся на Звёздную карту.
+Вам нужно выбрать приоритет для текущей миссии.
+
+⚠ Чем выше приоритет — тем выше шанс старта.
+Но растёт стресс и конкуренция за слот.`,
+        choices: [
+          {
+            title: "🔴 Критическая",
+            desc: "Сразу в бой за слот запуска.",
+            delta: { progress: +3, stress: +6, rep: +1, fleetLoadStep: +1 },
+            note: "Вы бросили вызов другим капитанам."
+          },
+          {
+            title: "🟡 Важная",
+            desc: "Баланс: шанс старта высокий, но без тотальной войны.",
+            delta: { progress: +2, stress: +2, rep: +1, fleetLoadStep: +0 },
+            note: "Рациональный выбор — редкость в космосе."
+          },
+          {
+            title: "🔵 Фоновая",
+            desc: "Сохранить ресурсы и ждать окна.",
+            delta: { progress: +1, stress: -2, rep: +0, fleetLoadStep: -1 },
+            note: "Миссия не потеряна. Она просто ушла в тень."
+          }
+        ]
+      },
+
+      {
+        id: "ship_type",
+        cyclePhase: "🚢 Флот",
+        title: "Выбор типа звездолёта",
+        hint: "Тяжёлый крейсер или манёвренный шаттл",
+        text:
+`Капитан продукта определяет маршрут:
+
+🚢 Тяжёлый крейсер Корпуса Развития — дальние и сложные экспедиции (больше выгода, дольше ожидание).
+🛸 Манёвренный шаттл IT-флота — быстрые и локальные задачи (быстрее запуск, риск переделок).`,
+        choices: [
+          {
+            title: "🚢 Тяжёлый крейсер Корпуса Развития",
+            desc: "Большая ставка: высокая отдача, но очередь и сборка.",
+            delta: { stress: +10, rep: +1 },
+            check: { base: 0.60, rep: 0.05 }, // admission on council
+            onSuccess: { progress: +6, stress: -2, rep: +2, setFlag: "pathHeavy" },
+            onFail: { progress: -2, stress: +6, rep: -2, setFlag: "pathHeavy" },
+            note: "Верховный Архитектор любит порядок и расчёт."
+          },
+          {
+            title: "🛸 Манёвренный шаттл IT-флота",
+            desc: "Быстрая траектория: меньше бюрократии, больше неожиданностей.",
+            delta: { progress: +4, stress: +2, rep: +1, setFlag: "pathShuttle" },
+            note: "Если миссия локальная — шаттл идеален."
+          }
+        ]
+      },
+
+      {
+        id: "dev_corps_council",
+        cyclePhase: "🏛 Совет",
+        title: "Совет Корпуса Развития",
+        hint: "Только если выбрали тяжёлый крейсер",
+        gate: (s)=> s.flags.pathHeavy === true,
+        text:
+`Все новые экспедиции для тяжёлого флота выносятся на Совет Корпуса Развития.
+Главнокомандующий и Верховный Архитектор смотрят на вас, как на график доходности в шторм.
+
+Фраза звучит холодно: «Допускать миссию к старту или нет?»`,
+        choices: [
+          {
+            title: "Показать расчёт ценности (ROI/impact) и рисков",
+            desc: "Жёсткая структура, минимум тумана.",
+            delta: { stress: +3, rep: +2 },
+            check: { base: 0.70, rep: 0.05 },
+            onSuccess: { progress: +10, stress: -4, rep: +2 },
+            onFail: { progress: -3, stress: +7, rep: -3 },
+            note: "Архитектор уважает таблицы и ясность."
+          },
+          {
+            title: "Попросить ограниченный старт (Pilot/MVP) на крейсере",
+            desc: "Компромисс: тяжёлый флот, но малый объём.",
+            delta: { progress: +5, stress: +1, rep: +1 },
+            check: { base: 0.66, rep: 0.04 },
+            onSuccess: { progress: +6, stress: -2, rep: +2 },
+            onFail: { progress: 0, stress: +5, rep: -2 },
+            note: "Компромисс иногда спасает миссию, иногда — раздражает всех."
+          },
+          {
+            title: "Сделать эмоциональный питч про клиентов",
+            desc: "Рискованно: это не тот Совет, где любят эмоции.",
+            delta: { stress: +6, rep: -1 },
+            check: { base: 0.52, rep: 0.03 },
+            onSuccess: { progress: +8, stress: -2, rep: +1 },
+            onFail: { progress: -4, stress: +9, rep: -3 },
+            note: "Иногда срабатывает. Чаще — нет."
+          }
+        ]
+      },
+
+      {
+        id: "direct_fleet_council",
+        cyclePhase: "🏛 Совет",
+        title: "Прямой выход на Совет Флота",
+        hint: "Если миссия идёт шаттлом (или крейсер отказали — вы ищете обход)",
+        gate: (s)=> s.flags.pathShuttle === true || s.flags.pathHeavy === true,
+        text:
+`Если миссия не требует тяжёлых инженерных доработок — капитан выходит напрямую на Совет Флота.
+Там вы защищаете маршрут перед:
+— Главнокомандующим
+— Верховным Архитектором
+— Адмиралом Технологий
+
+Вопрос: «Как быстро вы дадите эффект и насколько чётко описана траектория?»`,
+        choices: [
+          {
+            title: "Сконцентрироваться на скорости (быстрый эффект)",
+            desc: "Показать, что вы сможете дать сигнал ценности уже в этом цикле.",
+            delta: { progress: +3, stress: +4, rep: +1 },
+            check: { base: 0.67, rep: 0.04 },
+            onSuccess: { progress: +6, stress: -2, rep: +1 },
+            onFail: { progress: -2, stress: +6, rep: -2 },
+            note: "Скорость — валюта, но не бесконечная."
+          },
+          {
+            title: "Сконцентрироваться на ясности маршрута",
+            desc: "Жёстко формализовать требования и границы.",
+            delta: { progress: +2, stress: +1, rep: +2 },
+            check: { base: 0.72, rep: 0.05 },
+            onSuccess: { progress: +7, stress: -3, rep: +2 },
+            onFail: { progress: 0, stress: +4, rep: -1 },
+            note: "Туман — главный враг в гиперпространстве."
+          },
+          {
+            title: "Предложить пакет: MVP + дорожная карта",
+            desc: "Снять страхи и не потерять масштаб.",
+            delta: { progress: +4, stress: +2, rep: +1 },
+            check: { base: 0.69, rep: 0.04 },
+            onSuccess: { progress: +6, stress: -3, rep: +2 },
+            onFail: { progress: -1, stress: +5, rep: -2 },
+            note: "Хороший ход, если вы реально готовы держать фокус."
+          }
+        ]
+      },
+
+      {
+        id: "trajectory_review",
+        cyclePhase: "🧭 Разбор",
+        title: "Детальный разбор траектории",
+        hint: "Если маршрут туманен — миссию вернут на калибровку",
+        text:
+`Собираются адмиралы флота, ведущие навигаторы и старшие инженеры.
+Назначается эскадра, которая будет выполнять полёт.
+
+⚠ Если маршрут описан туманно — миссию возвращают капитану на повторную калибровку.`,
+        choices: [
+          {
+            title: "Уточнить ТЗ и границы прямо сейчас",
+            desc: "Меньше героизма — больше точности.",
+            delta: { progress: +3, stress: +5, rep: +2 },
+            note: "Калибровка требует энергии, но снижает риск аварии."
+          },
+          {
+            title: "Сказать: «и так понятно»",
+            desc: "Скорость в обмен на риск возврата.",
+            delta: { stress: +3, rep: -1 },
+            check: { base: 0.50, rep: 0.05 },
+            onSuccess: { progress: +6, stress: -1, rep: +1 },
+            onFail: { progress: -5, stress: +8, rep: -3, setFlag: "needsRecalibration" },
+            note: "Туман в маршруте почти всегда возвращается бумерангом."
+          },
+          {
+            title: "Собрать мини-сессию с навигаторами (30 минут)",
+            desc: "Убрать самые опасные неизвестные.",
+            delta: { progress: +4, stress: +2, rep: +1 },
+            check: { base: 0.70, rep: 0.04 },
+            onSuccess: { progress: +5, stress: -3, rep: +1 },
+            onFail: { progress: -1, stress: +4, rep: -1 },
+            note: "Синхронизация спасает циклы."
+          }
+        ]
+      },
+
+      {
+        id: "fuel_calc",
+        cyclePhase: "⛽ Расчёт",
+        title: "Расчёт топлива и времени в гиперпространстве",
+        hint: "Оценка сложности и очередь на запуск",
+        text:
+`Миссия получает оценку сложности и попадает в очередь на запуск.
+
+— Мало топлива → быстрый прыжок
+— Много топлива → возможно, экспедиция на годы
+
+Вам нужно выбрать подход:`,
+        choices: [
+          {
+            title: "Экономить топливо (быстрый прыжок)",
+            desc: "Сжать объём, чтобы стартовать раньше.",
+            delta: { progress: +5, stress: +2, rep: +1, setFlag: "fuelLight" },
+            note: "Короткий прыжок — меньше риска, но и меньше охват."
+          },
+          {
+            title: "Запросить больше топлива (большой охват)",
+            desc: "Ставка на масштаб и качество, но очередь может удлиниться.",
+            delta: { progress: +3, stress: +6, rep: +1, fleetLoadStep: +1, setFlag: "fuelHeavy" },
+            check: { base: 0.62, rep: 0.04 },
+            onSuccess: { progress: +6, stress: -1, rep: +1 },
+            onFail: { progress: -2, stress: +5, rep: -2 },
+            note: "Большая ставка редко проходит без боя."
+          },
+          {
+            title: "Смешанный режим (MVP сейчас, расширение потом)",
+            desc: "Оптимальный компромисс, если вы удержите фокус.",
+            delta: { progress: +4, stress: +3, rep: +2, setFlag: "fuelHybrid" },
+            note: "Дорожная карта — ваш антидот от scope creep."
+          }
+        ]
+      },
+
+      {
+        id: "big_council",
+        cyclePhase: "⚔ Большой Совет",
+        title: "Совет по формированию боевого вылета",
+        hint: "Битва за слот запуска (раз в две недели)",
+        text:
+`Раз в две недели собирается Большой Совет Флота.
+Он утверждает список миссий, которые реально полетят в ближайший цикл.
+
+Здесь разворачиваются эпические сражения за каждый слот запуска.`,
+        choices: [
+          {
+            title: "Лоббировать слот напрямую",
+            desc: "Жёсткое давление в Совете — дорого по стрессу.",
+            delta: { stress: +8, rep: -1 },
+            check: { base: 0.60, rep: 0.06 },
+            onSuccess: { progress: +10, stress: -3, rep: +2, setFlag: "gotSlot" },
+            onFail: { progress: -3, stress: +8, rep: -3, setFlag: "missedSlot" },
+            note: "Слот получают настойчивые. Иногда — слишком настойчивые."
+          },
+          {
+            title: "Обменяться слотами (дипломатия)",
+            desc: "Попробовать договориться, сохранив отношения.",
+            delta: { stress: +2, rep: +2 },
+            check: { base: 0.68, rep: 0.05 },
+            onSuccess: { progress: +8, stress: -2, rep: +2, setFlag: "gotSlot" },
+            onFail: { progress: -2, stress: +4, rep: -1, setFlag: "missedSlot" },
+            note: "Лучшие капитаны умеют меняться ресурсами."
+          },
+          {
+            title: "Добровольно снять миссию на цикл (стратегическая пауза)",
+            desc: "Снизить перегрев и подготовить траекторию лучше.",
+            delta: { progress: -2, stress: -10, rep: +1, setFlag: "pausedSlot" },
+            note: "Иногда лучший бой — тот, которого не было."
+          }
+        ]
+      },
+
+      {
+        id: "trajectory_window",
+        cyclePhase: "🪟 Окно",
+        title: "Корректировка траектории",
+        hint: "Короткое окно после Совета",
+        text:
+`После Совета есть короткое окно для изменения маршрута.
+Капитаны миссий направляют запросы Главнокомандующему:
+иногда траектория меняется, иногда — нет.`,
+        choices: [
+          {
+            title: "Отправить запрос на изменение траектории",
+            desc: "Шанс улучшить шансы миссии, но можно разозлить Совет.",
+            delta: { stress: +4, rep: +0 },
+            check: { base: 0.64, rep: 0.04 },
+            onSuccess: { progress: +6, stress: -2, rep: +1 },
+            onFail: { progress: -2, stress: +4, rep: -2 },
+            note: "Окно маленькое, решения — жёсткие."
+          },
+          {
+            title: "Оставить траекторию как есть",
+            desc: "Стабильность и отсутствие лишнего шума.",
+            delta: { stress: -2, progress: +2, rep: +1 },
+            note: "Иногда лучше не трогать орбиту."
+          },
+          {
+            title: "Сделать тихую оптимизацию внутри команды",
+            desc: "Без официальных запросов: улучшить качество исполнения.",
+            delta: { stress: +1, progress: +4, rep: +1 },
+            note: "Внутренняя дисциплина — невидимая сила."
+          }
+        ]
+      },
+
+      {
+        id: "debrief",
+        cyclePhase: "🏁 Итоги",
+        title: "Разбор полётов и награждение экипажей",
+        hint: "Успехи чествуют, аварии разбирают",
+        text:
+`В начале цикла проходит Разбор Полётов:
+успешные миссии чествуют, аварии обсуждают, иногда выписывают «космические выговоры».
+
+Как вы презентуете итоги?`,
+        choices: [
+          {
+            title: "Показать результат и уроки (честно)",
+            desc: "Даже если было больно — вы показываете, что учитесь.",
+            delta: { stress: -6, rep: +2 },
+            check: { base: 0.70, rep: 0.05 },
+            onSuccess: { progress: +12, stress: -4, rep: +2 },
+            onFail: { progress: +6, stress: +2, rep: -1 },
+            note: "Честность увеличивает доверие, если она структурирована."
+          },
+          {
+            title: "Показать только победы",
+            desc: "Короткий всплеск репутации, но риск отката позже.",
+            delta: { stress: -2, rep: +1 },
+            check: { base: 0.60, rep: 0.04 },
+            onSuccess: { progress: +10, stress: -2, rep: +1 },
+            onFail: { progress: +3, stress: +7, rep: -2 },
+            note: "Совет любит победы. Но он не любит сюрпризы."
+          },
+          {
+            title: "Перевести стрелки на астероиды и загрузку флота",
+            desc: "Оправдания снижают доверие, но иногда спасают нервы.",
+            delta: { stress: -3, rep: -2 },
+            check: { base: 0.55, rep: 0.03 },
+            onSuccess: { progress: +7, stress: -4, rep: 0 },
+            onFail: { progress: +1, stress: +6, rep: -3 },
+            note: "Космос жесток, но лидерство — про ответственность."
+          }
+        ]
+      },
+
+      {
+        id: "new_cycle",
+        cyclePhase: "🔁 Цикл",
+        title: "Новый виток галактического цикла",
+        hint: "Через две недели всё повторяется",
+        text:
+`Через две недели всё повторяется.
+Капитаны продуктов продолжают борьбу за ресурсы Флота и внимание Совета.
+
+Вы готовитесь к следующему циклу. Что вы делаете?`,
+        choices: [
+          {
+            title: "Подготовить следующий сигнал клиентов заранее",
+            desc: "Снять часть хаоса с будущего Совета.",
+            delta: { progress: +4, stress: +1, rep: +2, nextCycle: true },
+            note: "Проактивность — антидот от астероидов."
+          },
+          {
+            title: "Взять паузу и восстановить экипаж",
+            desc: "Снизить стресс и не сломаться на длинной дистанции.",
+            delta: { progress: +1, stress: -10, rep: +0, nextCycle: true },
+            note: "Капитан жив — миссии будут."
+          },
+          {
+            title: "Собрать ретро и убрать источники scope creep",
+            desc: "Чёткие границы спасают топливо.",
+            delta: { progress: +3, stress: -4, rep: +1, nextCycle: true },
+            note: "Границы — это скорость в маскировке."
+          }
+        ]
+      }
+    ];
+
+    /**********************
+     *  STATE
+     **********************/
+    const DEFAULT_STATE = () => ({
+      progress: 0,
+      stress: 12,      // start with some tension
+      rep: 0,          // hidden reputation
+      cycle: 1,
+      nodeIndex: 0,
+      fleetLoadIndex: 1, // "Средняя"
+      flags: {},
+      log: [],
+      ended: false,
+      seed: Math.floor(Math.random() * 1e9),
+      pendingToast: null,
+    });
+
+    let state = DEFAULT_STATE();
+
+    /**********************
+     *  UTILITIES
+     **********************/
+    function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+    function fmtSigned(n){ return (n>0?`+${n}`:`${n}`); }
+    function fleetLoad(){
+      return FLEET_LOADS[clamp(state.fleetLoadIndex,0,FLEET_LOADS.length-1)];
     }
-  }
+    function nowStamp(){
+      const d = new Date();
+      const hh = String(d.getHours()).padStart(2,'0');
+      const mm = String(d.getMinutes()).padStart(2,'0');
+      const ss = String(d.getSeconds()).padStart(2,'0');
+      return `${hh}:${mm}:${ss}`;
+    }
 
-  // side effects
-  updateTopPills();
-  renderProgress();
-  maybeWhisper();
+    // A deterministic-ish random (so save/load replays similar), but not cryptographically secure.
+    function mulberry32(a){
+      return function() {
+        let t = a += 0x6D2B79F5;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      }
+    }
+    function rng(){
+      state.seed = (state.seed + 0x9E3779B9) >>> 0;
+      return mulberry32(state.seed)();
+    }
 
-  el.back.disabled = history.length === 0;
-}
+    function showToast(msg){
+      const t = document.getElementById('toast');
+      const m = document.getElementById('toastMsg');
+      m.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(()=> t.classList.remove('show'), 5200);
+    }
 
-function choose(choice){
-  // snapshot for back
-  history.push({
-    prevId: currentId,
-    prevState: structuredClone(state),
-  });
+    function addLog(title, text){
+      state.log.unshift({
+        title,
+        time: nowStamp(),
+        text
+      });
+      renderLog();
+    }
 
-  Audio.click();
+    function applyDelta(delta){
+      if(!delta) return;
+      if(typeof delta.progress === "number") state.progress += delta.progress;
+      if(typeof delta.stress === "number") state.stress += delta.stress;
+      if(typeof delta.rep === "number") state.rep += delta.rep;
 
-  // advance counters
-  state.steps = clamp(state.steps + 1, 0, story.meta.maxSteps);
+      if(typeof delta.fleetLoadStep === "number"){
+        state.fleetLoadIndex = clamp(state.fleetLoadIndex + delta.fleetLoadStep, 0, FLEET_LOADS.length-1);
+      }
+      if(delta.setFlag){
+        state.flags[delta.setFlag] = true;
+      }
+      if(delta.nextCycle){
+        // handled outside (advance cycle)
+      }
 
-  // apply choice effects
-  applyDelta(choice.delta);
-  setFlags(choice.setFlags);
+      // clamp core stats
+      state.progress = clamp(state.progress, 0, 100);
+      state.stress = clamp(state.stress, 0, 100);
+    }
 
-  // some choices “wake creep”
-  if (choice.setFlags?.creepAwake) state.flags.creepAwake = true;
+    function rollCheck(check){
+      // success probability = base + rep*repCoef, then scaled by fleetLoad modifier and stress penalty.
+      // stress penalty: high stress reduces success slightly.
+      const repCoef = check?.rep ?? 0;
+      const base = check?.base ?? 0.6;
 
-  // move
-  currentId = choice.next;
+      const stressPenalty = (state.stress / 100) * 0.12; // up to -12%
+      const pRaw = base + state.rep * repCoef;
+      const p = clamp(pRaw * fleetLoad().mod - stressPenalty, 0.06, 0.94);
 
-  // random event after move
-  const ev = maybeRandomEvent();
-  if (ev){
-    // show event as whisper-like system note
-    el.whisper.textContent = "Событие: " + ev.text;
-    el.whisper.hidden = false;
-    if (ev.glitch) Audio.bad();
-    else Audio.good();
-  }
+      const r = rng();
+      return { success: r < p, p, r };
+    }
 
-  // auto-glitch when creep is high
-  if (creepScore() >= 60) setGlitch(true);
+    function maybeTriggerAsteroid(){
+      // Between nodes, chance depends on fleet load and stress.
+      // Not every time; avoid spamming: only once per 2 nodes on average.
+      const loadFactor = (state.fleetLoadIndex / (FLEET_LOADS.length-1)); // 0..1
+      const stressFactor = state.stress / 100;
+      const base = 0.10;
+      const chance = clamp(base + loadFactor*0.12 + stressFactor*0.10, 0.08, 0.32);
 
-  // render + log
-  pushLog(choice.label);
-  renderNode();
-}
+      const r = rng();
+      if(r < chance){
+        const ev = ASTEROID_EVENTS[Math.floor(rng() * ASTEROID_EVENTS.length)];
+        return ev;
+      }
+      return null;
+    }
 
-function restart(){
-  stopTyping();
-  state = structuredClone(story.initialState);
-  currentId = "start";
-  history = [];
-  el.log.innerHTML = "";
-  renderNode();
-}
+    function currentNode(){
+      // find next node that passes gate
+      for(let i = state.nodeIndex; i < NODES.length; i++){
+        const node = NODES[i];
+        if(typeof node.gate === "function" && !node.gate(state)) continue;
+        state.nodeIndex = i;
+        return node;
+      }
+      return null;
+    }
 
-function back(){
-  stopTyping();
-  if (!history.length) return;
-  const last = history.pop();
-  currentId = last.prevId;
-  state = last.prevState;
-  Audio.click();
-  renderNode();
-}
+    function renderHUD(){
+      document.getElementById('valProgress').textContent = `${Math.round(state.progress)}%`;
+      document.getElementById('valStress').textContent = `${Math.round(state.stress)}%`;
+      document.getElementById('valCycle').textContent = `${state.cycle}`;
+      document.getElementById('valFleetLoad').textContent = fleetLoad().name;
 
-el.restart.addEventListener("click", restart);
-el.back.addEventListener("click", back);
-el.skip.addEventListener("click", () => {
-  if (!typing.running) return;
-  stopTyping();
-  el.nodeText.textContent = typing.fullText;
-});
+      document.getElementById('barProgress').style.width = `${state.progress}%`;
+      document.getElementById('barStress').style.width = `${state.stress}%`;
 
-document.addEventListener("click", () => {
-  // warm up audio context on first interaction
-  if (el.audioToggle.checked) Audio.click();
-}, { once:true });
+      // move ship along route (from 10% to 92%)
+      const x = 10 + (82 * (state.progress/100));
+      document.getElementById('ship').style.left = `${x}%`;
 
-renderNode();
-</script>
+      // slight danger flash on high stress
+      const canvas = document.getElementById('galaxyCanvas');
+      if(state.stress >= 85){
+        canvas.classList.add('flashDanger');
+        setTimeout(()=>canvas.classList.remove('flashDanger'), 380);
+      }
+    }
+
+    function renderLog(){
+      const el = document.getElementById('log');
+      el.innerHTML = "";
+      if(state.log.length === 0){
+        const empty = document.createElement('div');
+        empty.className = "entry";
+        empty.innerHTML = `
+          <div class="entryHeader"><b>Пусто</b><span>${nowStamp()}</span></div>
+          <p>Журнал начнётся после первого решения.</p>
+        `;
+        el.appendChild(empty);
+        return;
+      }
+      for(const it of state.log){
+        const d = document.createElement('div');
+        d.className = "entry";
+        d.innerHTML = `
+          <div class="entryHeader"><b>${escapeHtml(it.title)}</b><span>${escapeHtml(it.time)}</span></div>
+          <p>${escapeHtml(it.text)}</p>
+        `;
+        el.appendChild(d);
+      }
+    }
+
+    function escapeHtml(s){
+      return String(s)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function renderScene(scene, overrideTitle){
+      const title = document.getElementById('sceneTitle');
+      const hint = document.getElementById('sceneHint');
+      const text = document.getElementById('sceneText');
+      const choices = document.getElementById('choices');
+      const ending = document.getElementById('ending');
+
+      ending.style.display = "none";
+      ending.innerHTML = "";
+
+      title.textContent = overrideTitle || scene.title;
+      hint.textContent = scene.hint || "—";
+
+      document.getElementById('sceneCyclePill').textContent = `Цикл ${state.cycle}`;
+      document.getElementById('sceneNodePill').textContent = `Узел: ${scene.cyclePhase}`;
+
+      const riskPill = document.getElementById('sceneRiskPill');
+      if(scene.risk){
+        riskPill.style.display = "";
+        riskPill.textContent = `Риск: ${scene.risk}`;
+      } else {
+        riskPill.style.display = "none";
+      }
+
+      text.textContent = scene.text;
+
+      choices.innerHTML = "";
+      if(scene.choices && scene.choices.length){
+        for(const c of scene.choices){
+          const btn = document.createElement('button');
+          btn.className = "choice";
+          btn.type = "button";
+          btn.addEventListener('click', ()=> onChoose(scene, c));
+          btn.innerHTML = renderChoiceHtml(c);
+          choices.appendChild(btn);
+        }
+      }
+      // enable/disable "Продолжить"
+      document.getElementById('btnNext').disabled = !!(scene.choices && scene.choices.length);
+    }
+
+    function renderChoiceHtml(c){
+      const tags = [];
+      if(c.delta){
+        if(typeof c.delta.progress === "number" && c.delta.progress !== 0){
+          tags.push({ cls: c.delta.progress>0 ? "ok":"bad", txt: `🚀 ${fmtSigned(c.delta.progress)}%`});
+        }
+        if(typeof c.delta.stress === "number" && c.delta.stress !== 0){
+          tags.push({ cls: c.delta.stress<0 ? "ok":"bad", txt: `🧠 ${fmtSigned(c.delta.stress)}%`});
+        }
+        if(typeof c.delta.rep === "number" && c.delta.rep !== 0){
+          tags.push({ cls: c.delta.rep>0 ? "ok":"bad", txt: `🏛 ${fmtSigned(c.delta.rep)} rep`});
+        }
+        if(typeof c.delta.fleetLoadStep === "number" && c.delta.fleetLoadStep !== 0){
+          tags.push({ cls: "neu", txt: `🛰 ${c.delta.fleetLoadStep>0?"+":"-"}нагрузка`});
+        }
+      }
+      if(c.check){
+        tags.push({ cls: "neu", txt: "🎲 проверка" });
+      }
+
+      const tagsHtml = tags.map(t=>`<span class="tag ${t.cls}">${escapeHtml(t.txt)}</span>`).join("");
+
+      return `
+        <div class="choiceTop">
+          <div style="flex:1">
+            <p class="choiceTitle">${escapeHtml(c.title)}</p>
+            <p class="choiceDesc">${escapeHtml(c.desc || "")}</p>
+          </div>
+          <div class="delta">${tagsHtml}</div>
+        </div>
+      `;
+    }
+
+    function checkEnd(){
+      if(state.ended) return true;
+
+      if(state.stress >= 100){
+        state.ended = true;
+        renderEnding({
+          title: "КРИОСОН: капитан перегрелся",
+          text:
+`Стресс достиг критической отметки.
+Капитан ушёл в криосон, а миссии остались без навигации.
+
+Совет фиксирует: «Системы не выдержали перегрузку».`,
+          kind: "fail"
+        });
+        return true;
+      }
+      if(state.progress >= 100){
+        state.ended = true;
+        renderEnding({
+          title: "ЦЕНТР ГАЛАКТИКИ ДОСТИГНУТ",
+          text:
+`Корабль входит в сияние Центра Галактики.
+Ценность доставлена. Экипажи чествуются. Совет аплодирует.
+
+Вы выиграли — и остались в строю.`,
+          kind: "win"
+        });
+        return true;
+      }
+      return false;
+    }
+
+    function renderEnding({title, text, kind}){
+      const choices = document.getElementById('choices');
+      choices.innerHTML = "";
+
+      const ending = document.getElementById('ending');
+      ending.style.display = "";
+      ending.innerHTML = `
+        <h2>${escapeHtml(title)}</h2>
+        <p>${escapeHtml(text)}</p>
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+          <button class="btn" id="btnRestartInline">Новая игра</button>
+          <button class="btn secondary" id="btnExportInline">Экспорт лога</button>
+        </div>
+      `;
+      document.getElementById('btnRestartInline').addEventListener('click', resetGame);
+      document.getElementById('btnExportInline').addEventListener('click', exportLog);
+
+      // show toast summary
+      const summary =
+        `Итог: ${kind==="win"?"победа":"поражение"}\n`+
+        `Прогресс: ${Math.round(state.progress)}% • Стресс: ${Math.round(state.stress)}% • Циклов: ${state.cycle}`;
+      showToast(summary);
+
+      document.getElementById('btnNext').disabled = true;
+    }
+
+    function onChoose(scene, choice){
+      if(state.ended) return;
+
+      // Apply immediate delta
+      applyDelta(choice.delta);
+
+      // roll check if exists
+      let outcomeText = "";
+      if(choice.check){
+        const { success, p } = rollCheck(choice.check);
+        if(success){
+          applyDelta(choice.onSuccess);
+          outcomeText += `🎲 Проверка пройдена (шанс ${Math.round(p*100)}%).\n`;
+          outcomeText += choice.onSuccessText || "Совет одобряет манёвр.";
+        } else {
+          applyDelta(choice.onFail);
+          outcomeText += `🎲 Проверка провалена (шанс ${Math.round(p*100)}%).\n`;
+          outcomeText += choice.onFailText || "Совет хмурится. Траектория дрожит.";
+        }
+      }
+
+      // Log the choice
+      const deltaSummary = summarizeDelta(choice.delta);
+      const repHidden = (choice.delta?.rep || 0) !== 0 ? "\n(Репутация изменилась.)" : "";
+      addLog(
+        `${scene.cyclePhase}: ${scene.title}`,
+        `Выбор: ${choice.title}\n` +
+        (deltaSummary ? `${deltaSummary}\n` : "") +
+        (choice.note ? `${choice.note}\n` : "") +
+        (outcomeText ? `\n${outcomeText}\n` : "") +
+        repHidden
+      );
+
+      renderHUD();
+
+      // End check
+      if(checkEnd()) return;
+
+      // Advance to next node
+      advanceFlow(choice.delta?.nextCycle === true);
+    }
+
+    function summarizeDelta(delta){
+      if(!delta) return "";
+      const parts = [];
+      if(typeof delta.progress === "number" && delta.progress !== 0) parts.push(`🚀 Прогресс ${fmtSigned(delta.progress)}%`);
+      if(typeof delta.stress === "number" && delta.stress !== 0) parts.push(`🧠 Стресс ${fmtSigned(delta.stress)}%`);
+      if(typeof delta.fleetLoadStep === "number" && delta.fleetLoadStep !== 0) parts.push(`🛰 Нагрузка флота ${delta.fleetLoadStep>0?"+":"-"}шаг`);
+      // rep is hidden from player; still show subtle
+      if(typeof delta.rep === "number" && delta.rep !== 0) parts.push(`🏛 Репутация ${fmtSigned(delta.rep)}`);
+      if(delta.setFlag) parts.push(`⚑ Флаг: ${delta.setFlag}`);
+      return parts.length ? `Последствия: ${parts.join(" • ")}` : "";
+    }
+
+    function advanceFlow(nextCycle){
+      // After a decision, we may insert an asteroid event
+      if(nextCycle){
+        state.cycle += 1;
+        // fleet load drifts each cycle a bit
+        const drift = (rng() < 0.5 ? -1 : +1) * (rng() < 0.45 ? 1 : 0);
+        state.fleetLoadIndex = clamp(state.fleetLoadIndex + drift, 0, FLEET_LOADS.length-1);
+        addLog("🔁 Система циклов", `Начался новый цикл: ${state.cycle}\nЗагруженность флота теперь: ${fleetLoad().name}`);
+      }
+
+      // Move node index forward
+      state.nodeIndex += 1;
+
+      // Possibly trigger asteroid disruption (between nodes), but not right after end.
+      const ev = maybeTriggerAsteroid();
+      if(ev){
+        // Render asteroid as a temporary scene without advancing node index further.
+        renderHUD();
+        renderScene(ev, ev.title);
+        addLog(ev.title, ev.text);
+        showToast("☄ ВНЕШНЕЕ СОБЫТИЕ: астероидная угроза изменила цикл.");
+        return;
+      }
+
+      // Otherwise render next storyline node
+      const node = currentNode();
+      if(!node){
+        // if no nodes remain, end based on progress
+        state.ended = true;
+        renderEnding({
+          title: "ХРОНИКИ ФЛОТА ЗАКОНЧИЛИСЬ",
+          text:
+`Сюжетный журнал этого прототипа завершён.
+Если прогресс < 100%, значит Центр Галактики не достигнут — но вы всё ещё в строю.
+
+Хотите — добавим больше миссий/сцен (ещё 2–3 цикла контента).`,
+          kind: "neutral"
+        });
+        return;
+      }
+
+      renderHUD();
+      renderScene(node);
+      saveAuto();
+    }
+
+    function saveAuto(){
+      try{
+        localStorage.setItem("cbonds_space_game_autosave", JSON.stringify(state));
+      } catch(e){}
+    }
+
+    function saveToLocal(){
+      try{
+        localStorage.setItem("cbonds_space_game_save", JSON.stringify(state));
+        showToast("Сохранено в браузер (localStorage).");
+      } catch(e){
+        showToast("Не удалось сохранить. Возможно, ограничение хранилища браузера.");
+      }
+    }
+
+    function loadFromLocal(key){
+      try{
+        const raw = localStorage.getItem(key);
+        if(!raw) return null;
+        const obj = JSON.parse(raw);
+        // minimal validation
+        if(typeof obj !== "object" || obj === null) return null;
+        return obj;
+      } catch(e){
+        return null;
+      }
+    }
+
+    function loadSave(){
+      const obj = loadFromLocal("cbonds_space_game_save") || loadFromLocal("cbonds_space_game_autosave");
+      if(!obj){
+        showToast("Сохранение не найдено.");
+        return;
+      }
+      state = obj;
+      state.ended = !!state.ended;
+
+      renderHUD();
+      renderLog();
+
+      if(state.ended){
+        checkEnd(); // renders ending
+      } else {
+        const node = currentNode();
+        if(node) renderScene(node);
+      }
+
+      showToast("Сохранение загружено.");
+    }
+
+    function resetGame(){
+      state = DEFAULT_STATE();
+      renderHUD();
+      state.log = [];
+      renderLog();
+      const node = currentNode();
+      renderScene(node);
+      showToast("Новая игра началась. Удачи, капитан.");
+      saveAuto();
+    }
+
+    function exportLog(){
+      const lines = [];
+      lines.push(`CBONDS: Полёт к Центру Галактики`);
+      lines.push(`Дата: ${new Date().toLocaleString()}`);
+      lines.push(`Прогресс: ${Math.round(state.progress)}%`);
+      lines.push(`Стресс: ${Math.round(state.stress)}%`);
+      lines.push(`Циклов: ${state.cycle}`);
+      lines.push(`Загруженность флота: ${fleetLoad().name}`);
+      lines.push(`—`);
+      for(const e of [...state.log].reverse()){
+        lines.push(`[${e.time}] ${e.title}`);
+        lines.push(e.text);
+        lines.push(`—`);
+      }
+      const blob = new Blob([lines.join("\n")], {type:"text/plain;charset=utf-8"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `cbonds_space_log_${Date.now()}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 8000);
+    }
+
+    function showHelp(){
+      showToast(
+`Как играть:
+• Выбирайте варианты — они меняют 🚀 прогресс и 🧠 стресс.
+• «Репутация в Совете» скрыта, но влияет на проверки 🎲.
+• Загруженность флота 🛰 меняется и влияет на вероятность успеха.
+• Иногда прилетают ☄ астероиды и ломают планы.
+
+Победа: прогресс 100%.
+Поражение: стресс 100%.`
+      );
+    }
+
+    function onContinue(){
+      if(state.ended) return;
+      // If currently on an asteroid scene with choices rendered, button is disabled by renderScene.
+      // If no choices (rare), advance.
+      const node = currentNode();
+      if(node){
+        renderScene(node);
+      } else {
+        advanceFlow(false);
+      }
+    }
+
+    /**********************
+     *  INIT / RENDER
+     **********************/
+    function init(){
+      // clock ticker
+      setInterval(()=>{
+        document.getElementById('clock').textContent =
+          `Система: CBONDS-FLEET / Время: ${new Date().toLocaleTimeString()}`;
+      }, 1000);
+
+      // bind buttons
+      document.getElementById('btnHelp').addEventListener('click', showHelp);
+      document.getElementById('btnSave').addEventListener('click', saveToLocal);
+      document.getElementById('btnLoad').addEventListener('click', loadSave);
+      document.getElementById('btnReset').addEventListener('click', resetGame);
+      document.getElementById('btnExport').addEventListener('click', exportLog);
+      document.getElementById('btnNext').addEventListener('click', onContinue);
+
+      document.getElementById('toastClose').addEventListener('click', ()=>{
+        document.getElementById('toast').classList.remove('show');
+      });
+
+      // try autosave
+      const auto = loadFromLocal("cbonds_space_game_autosave");
+      if(auto && typeof auto === "object"){
+        state = auto;
+        showToast("Автосейв найден — продолжили полёт.");
+      } else {
+        showToast("Канал установлен. Приём сигналов активен.");
+      }
+
+      renderHUD();
+      renderLog();
+
+      if(state.ended){
+        checkEnd();
+      } else {
+        const node = currentNode();
+        renderScene(node);
+      }
+    }
+
+    init();
+  </script>
 </body>
 </html>
